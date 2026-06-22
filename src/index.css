@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-yellow: #f5c400;
+  --color-midnight: #150f23;
+  --color-deep: #1f1633;
+  --color-paper: #f6f3e9;
+  --color-ink-muted: #65606b;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: #150f23;
+    font-family: Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { text-decoration: none; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  ::selection { background: #f5c400; color: #150f23; }
+}
+
+@layer components {
+  .page-shell { @apply mx-auto w-[min(1180px,calc(100%-40px))]; }
+
+  .brand-mark { @apply inline-flex items-center gap-3 text-sm font-bold tracking-[-.01em] text-white; }
+  .brand-icon { @apply grid size-9 place-items-center rounded-lg bg-yellow text-midnight; }
+
+  .nav-link { @apply transition-colors hover:text-white; }
+  .eyebrow, .section-label { @apply font-mono text-[11px] font-bold uppercase tracking-[.19em]; }
+  .eyebrow { @apply inline-flex items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-white/65; }
+  .status-dot { @apply relative size-2 rounded-full bg-yellow; box-shadow: 0 0 0 4px rgb(245 196 0 / .12); }
+
+  .hero-title { font-family: "Sentry Display", Rubik, system-ui, sans-serif; font-size: clamp(3.4rem, 7vw, 5.5rem); font-weight: 700; line-height: 1.08; letter-spacing: -.035em; }
+  .section-title { font-family: "Sentry Display", Rubik, system-ui, sans-serif; font-size: clamp(2.5rem, 5vw, 3.75rem); font-weight: 500; line-height: 1.1; letter-spacing: -.025em; }
+  .highlight-chip { @apply inline-block -rotate-1 rounded-md bg-yellow px-3 pb-2 text-midnight; }
+  .underline-sketch { position: relative; white-space: nowrap; }
+  .underline-sketch::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 5px; background: #f5c400; border-radius: 9999px; transform: rotate(-1deg); }
+
+  .button { @apply inline-flex min-h-11 items-center justify-center gap-2.5 rounded-lg px-4 text-sm font-bold uppercase tracking-[.2px] transition-all duration-200; }
+  .button:hover { transform: translateY(-2px); }
+  .button-small { @apply min-h-10 px-4 text-xs; }
+  .button-primary { @apply bg-white text-midnight hover:bg-[#efefef]; box-shadow: #150f23 0 0 8px 6px; }
+  .button-light { @apply bg-white text-midnight hover:bg-yellow; }
+  .button-ghost { @apply border border-white/20 text-white hover:border-white/50 hover:bg-white/5; }
+  .button-dark { @apply bg-midnight text-white hover:bg-deep; }
+  .button-outline-dark { @apply border border-midnight/40 text-midnight hover:bg-black/5; }
+
+  .event-card { @apply overflow-hidden rounded-[18px] border-t-[6px] border-yellow bg-white text-midnight shadow-[0_30px_90px_rgba(0,0,0,.25)]; }
+  .chapter-card { @apply overflow-hidden rounded-xl border border-white/10 bg-deep transition-transform duration-300 hover:-translate-y-1; }
+  .service-card { @apply border-b bg-white transition-colors hover:bg-[#f8f7fa] md:odd:border-r; }
+  .product-card { @apply overflow-hidden rounded-xl border border-white/10 bg-midnight transition-transform duration-300 hover:-translate-y-1; }
+  .product-preview { @apply m-3 min-h-[190px] overflow-hidden rounded-lg border border-white/10 bg-deep; }
+  .ecosystem-card { @apply relative rounded-[18px] border border-black/10 p-7 md:p-9; }
+  .ecosystem-connector { @apply absolute left-1/2 top-1/2 z-10 hidden size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-paper bg-yellow font-mono text-lg font-bold lg:grid; }
+}
+
+.hero-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(255 255 255 / .09) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, transparent 4%, black 30%, transparent 94%);
+}
+
+.hero-grid::after {
+  content: "";
+  position: absolute;
+  top: 5rem;
+  right: -12rem;
+  width: 40rem;
+  height: 40rem;
+  border: 1px solid rgb(245 196 0 / .14);
+  border-radius: 9999px;
+  box-shadow: 0 0 0 80px rgb(245 196 0 / .025), 0 0 0 160px rgb(245 196 0 / .018);
+}
+
+.ticker-track { display: flex; width: max-content; align-items: center; gap: 3rem; animation: ticker 28s linear infinite; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+.showcase-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(255 255 255 / .06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+@media (max-width: 640px) {
+  .page-shell { width: min(100% - 32px, 1180px); }
+  .hero-title { font-size: clamp(3rem, 15vw, 4rem); }
+  .highlight-chip { padding-left: .45rem; padding-right: .45rem; }
+}
+
+.squiggle {
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14' preserveAspectRatio='none'%3E%3Cpath d='M0 8 C10 1 20 13 30 7 S50 1 60 8 S80 13 90 6 S110 1 120 8' fill='none' stroke='%23f5c400' stroke-width='3'/%3E%3C/svg%3E") repeat-x center / 120px 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

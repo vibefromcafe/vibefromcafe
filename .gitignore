@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.pnpm-store/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+.DS_Store
+
+# Local visual QA captures
+vfc-*.png
+vcfc-*.png
+vibedevid-homepage.png
+vibefromcafe-homepage.png
+genesis-marketplace.png
