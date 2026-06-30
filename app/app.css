@@ -30,6 +30,7 @@
   .brand-icon { @apply grid size-9 place-items-center rounded-lg bg-yellow text-midnight; }
 
   .nav-link { @apply transition-colors hover:text-white; }
+  .nav-link-active { @apply text-yellow; }
   .eyebrow, .section-label { @apply font-mono text-[11px] font-bold uppercase tracking-[.19em]; }
   .eyebrow { @apply inline-flex items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-white/65; }
   .status-dot { @apply relative size-2 rounded-full bg-yellow; box-shadow: 0 0 0 4px rgb(245 196 0 / .12); }
@@ -56,6 +57,14 @@
   .product-preview { @apply m-3 min-h-[190px] overflow-hidden rounded-lg border border-white/10 bg-deep; }
   .ecosystem-card { @apply relative rounded-[18px] border border-black/10 p-7 md:p-9; }
   .ecosystem-connector { @apply absolute left-1/2 top-1/2 z-10 hidden size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-paper bg-yellow font-mono text-lg font-bold lg:grid; }
+  .site-header { @apply sticky top-0 z-50 border-b border-white/10 bg-[#08070b]/95 text-white backdrop-blur-xl; }
+  .page-title { font-family: "Sentry Display", Rubik, system-ui, sans-serif; font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 700; line-height: 1.02; letter-spacing: -.04em; }
+  .dark-card { @apply rounded-[18px] border border-white/10 bg-[#121116] p-6 md:p-8; }
+  .dark-pill { @apply rounded-full border border-white/10 px-3 py-1.5; }
+  .form-field { @apply flex flex-col gap-2 text-sm font-semibold text-white/80; }
+  .form-field input, .form-field textarea, .form-field select { @apply w-full rounded-lg border border-white/10 bg-black px-4 py-3.5 font-normal text-white outline-none transition focus:border-yellow focus:ring-2 focus:ring-yellow/15; }
+  .form-field textarea { resize: vertical; }
+  .form-field input::placeholder, .form-field textarea::placeholder { color: rgb(255 255 255 / .28); }
 }
 
 .hero-grid::before {
@@ -79,7 +88,9 @@
   box-shadow: 0 0 0 80px rgb(245 196 0 / .025), 0 0 0 160px rgb(245 196 0 / .018);
 }
 
-.ticker-track { display: flex; width: max-content; align-items: center; gap: 3rem; animation: ticker 28s linear infinite; }
+.ticker { overflow: hidden; }
+.ticker-track { display: flex; width: max-content; align-items: center; animation: ticker 88s linear infinite; }
+.ticker-group { display: flex; flex-shrink: 0; align-items: center; gap: 3rem; padding-right: 3rem; }
 @keyframes ticker { to { transform: translateX(-50%); } }
 
 .showcase-grid::before {

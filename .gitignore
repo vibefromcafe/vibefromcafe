@@ -1,6 +1,9 @@
 node_modules/
 dist/
+build/
+.react-router/
 .pnpm-store/
+.wrangler/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

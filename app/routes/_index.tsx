@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import {
   ArrowDownRight,
   ArrowRight,
@@ -22,9 +23,11 @@ import {
 } from 'lucide-react'
 
 const chapters = [
-  { city: 'Jakarta', spots: '12 cafes', people: '480 builders', next: 'Kemang · Sat, 10:00', tone: 'bg-[#f5c400]' },
-  { city: 'Bandung', spots: '8 cafes', people: '260 builders', next: 'Dago · Sun, 09:30', tone: 'bg-[#ff8ca1]' },
-  { city: 'Surabaya', spots: '6 cafes', people: '190 builders', next: 'Tunjungan · Sat, 13:00', tone: 'bg-[#79628c]' },
+  { name: 'Jogja', scope: 'Yogyakarta', detail: '258 members', tone: 'bg-[#f5c400]' },
+  { name: 'Surabaya-Malang', scope: 'East Java', detail: '40 members', tone: 'bg-[#79628c]' },
+  { name: 'Jabodetabek', scope: 'Greater Jakarta', detail: '88 members', tone: 'bg-[#7bb6ff]' },
+  { name: 'Kuala Lumpur Isp.', scope: 'Kuala Lumpur', detail: '18 members', tone: 'bg-[#f4a261]' },
+  { name: 'Bandung', scope: 'Bandung', detail: '9 members', tone: 'bg-[#ff8ca1]' },
 ]
 
 const principles = [
@@ -49,6 +52,21 @@ const principles = [
 ]
 
 const communityNames = ['designers', 'engineers', 'founders', 'marketers', 'researchers', 'the curious']
+const tickerNames = Array.from({ length: 4 }, () => communityNames).flat()
+
+const footerNavigation = [
+  { label: 'Cafes', href: 'https://cafein.id', external: true },
+  { label: 'Chapters', to: '/chapters' },
+  { label: 'Events', to: '/events' },
+  { label: 'About', to: '/about' },
+  { label: 'Join', to: '/join' },
+]
+
+const footerConnect = [
+  { label: 'X (@vibefromcafe)', href: 'https://x.com/vibefromcafe' },
+  { label: 'Instagram (@vibefromcafe)', href: 'https://www.instagram.com/vibefromcafe' },
+  { label: 'GitHub (@vibefromcafe)', href: 'https://github.com/vibefromcafe' },
+]
 
 const services = [
   {
@@ -113,50 +131,52 @@ const products = [
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <a className="brand-mark" href="#top" aria-label="Vibe Coding From Cafe home">
+    <Link className="brand-mark" to="/" aria-label="Vibe Coding From Cafe home">
       <span className="brand-icon"><Coffee size={compact ? 18 : 22} strokeWidth={2.6} /></span>
       <span className={compact ? 'hidden sm:inline' : ''}>Vibe Coding From Cafe</span>
-    </a>
+    </Link>
   )
 }
 
-function App() {
+export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <main id="top" className="overflow-hidden">
       <section className="hero-grid relative min-h-[780px] bg-midnight text-white">
-        <nav className="page-shell relative z-30 flex h-20 items-center justify-between border-b border-white/10">
-          <BrandMark />
-          <div className="hidden items-center gap-8 text-sm text-white/70 md:flex">
-            <a className="nav-link" href="#services">AI Services</a>
-            <a className="nav-link" href="#showcase">Products</a>
-            <a className="nav-link" href="#community">Community</a>
-            <a className="nav-link" href="#chapters">Chapters</a>
-            <a className="button button-small button-light" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Start a project <ArrowRight size={15} /></a>
-          </div>
-          <button
-            className="grid size-11 place-items-center rounded-lg border border-white/15 md:hidden"
-            type="button"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </nav>
-
-        {menuOpen ? (
-          <div className="page-shell absolute inset-x-0 top-20 z-20 border-b border-white/10 bg-midnight py-6 md:hidden">
-            <div className="flex flex-col gap-5 text-lg">
-              <a href="#services" onClick={() => setMenuOpen(false)}>AI Services</a>
-              <a href="#showcase" onClick={() => setMenuOpen(false)}>Products</a>
-              <a href="#community" onClick={() => setMenuOpen(false)}>Community</a>
-              <a href="#chapters" onClick={() => setMenuOpen(false)}>Chapters</a>
-              <a className="text-yellow" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry" onClick={() => setMenuOpen(false)}>Start an AI project →</a>
+        <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-midnight/90 backdrop-blur-xl">
+          <nav className="page-shell flex h-20 items-center justify-between" aria-label="Main navigation">
+            <BrandMark />
+            <div className="hidden items-center gap-8 text-sm text-white/70 md:flex">
+              <a className="nav-link" href="https://cafein.id" target="_blank" rel="noreferrer">Cafes</a>
+              <Link className="nav-link" to="/chapters">Chapters</Link>
+              <Link className="nav-link" to="/events">Events</Link>
+              <Link className="nav-link" to="/about">About</Link>
+              <Link className="button button-small bg-yellow text-midnight" to="/join">Join</Link>
             </div>
-          </div>
-        ) : null}
+            <button
+              className="grid size-11 place-items-center rounded-lg border border-white/15 md:hidden"
+              type="button"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </nav>
+
+          {menuOpen ? (
+            <div className="page-shell border-t border-white/10 py-6 md:hidden">
+              <div className="flex flex-col gap-5 text-lg">
+                <a href="https://cafein.id" target="_blank" rel="noreferrer">Cafes</a>
+                <Link to="/chapters" onClick={() => setMenuOpen(false)}>Chapters</Link>
+                <Link to="/events" onClick={() => setMenuOpen(false)}>Events</Link>
+                <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
+                <Link className="text-yellow" to="/join" onClick={() => setMenuOpen(false)}>Join community →</Link>
+              </div>
+            </div>
+          ) : null}
+        </header>
 
         <div className="page-shell relative z-10 grid items-center gap-16 pb-24 pt-20 lg:grid-cols-[1.1fr_.9fr] lg:pb-28 lg:pt-24">
           <div>
@@ -168,13 +188,13 @@ function App() {
               Vibe Coding From Cafe adalah komunitas pengguna AI sekaligus AI studio—tempat praktisi belajar bersama dan membantu bisnis membangun solusi yang benar-benar dipakai.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a className="button button-primary" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Build AI with us <ArrowRight size={18} /></a>
-              <a className="button button-ghost" href="#community"><Users size={17} /> Join the community</a>
+              <Link className="button button-primary" to="/contact">Build AI with us <ArrowRight size={18} /></Link>
+              <Link className="button button-ghost" to="/join"><Users size={17} /> Join the community</Link>
             </div>
             <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/50">
-              <span className="flex items-center gap-2"><Users size={17} className="text-yellow" /> 1,200+ AI learners</span>
-              <span className="flex items-center gap-2"><Coffee size={17} className="text-yellow" /> 26 cafe partners</span>
-              <span className="flex items-center gap-2"><MapPin size={17} className="text-yellow" /> 6 active cities</span>
+              <span className="flex items-center gap-2"><Users size={17} className="text-yellow" /> 400+ community members</span>
+              <span className="flex items-center gap-2"><Coffee size={17} className="text-yellow" /> 4,000+ cafes indexed</span>
+              <span className="flex items-center gap-2"><MapPin size={17} className="text-yellow" /> 5 active groups</span>
             </div>
           </div>
 
@@ -207,8 +227,12 @@ function App() {
 
       <div className="ticker border-y border-white/10 bg-midnight py-4 text-white">
         <div className="ticker-track font-mono text-xs font-bold uppercase tracking-[.22em]">
-          {[...communityNames, ...communityNames].map((name, index) => (
-            <span key={`${name}-${index}`} className="flex items-center gap-6 whitespace-nowrap"><Sparkles size={14} /> {name}</span>
+          {[0, 1].map((group) => (
+            <div key={group} className="ticker-group">
+              {tickerNames.map((name, index) => (
+                <span key={`${group}-${name}-${index}`} className="flex items-center gap-6 whitespace-nowrap"><Sparkles size={14} /> {name}</span>
+              ))}
+            </div>
           ))}
         </div>
       </div>
@@ -231,7 +255,7 @@ function App() {
               <ul className="mt-8 space-y-4 text-sm text-ink-muted">
                 {['Cafe meetups dan build sessions', 'Knowledge sharing tanpa gatekeeping', 'Kolaborasi lintas profesi dan kota'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-midnight" strokeWidth={3} /> {item}</li>)}
               </ul>
-              <a className="mt-9 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4" href="#chapters">Temukan chapter Anda <ArrowRight size={16} /></a>
+              <Link className="mt-9 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4" to="/chapters">Temukan chapter Anda <ArrowRight size={16} /></Link>
             </article>
 
             <div className="ecosystem-connector" aria-hidden="true">↔</div>
@@ -245,7 +269,7 @@ function App() {
               <ul className="mt-8 space-y-4 text-sm text-white/60">
                 {['Discovery dari masalah, bukan tren', 'Design dan engineering end-to-end', 'Dibangun untuk digunakan di production'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" strokeWidth={3} /> {item}</li>)}
               </ul>
-              <a className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Diskusikan project AI <ArrowRight size={16} /></a>
+              <Link className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4" to="/contact">Diskusikan project AI <ArrowRight size={16} /></Link>
             </article>
           </div>
 
@@ -260,7 +284,7 @@ function App() {
           <div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr]">
             <div>
               <p className="section-label">/ AI SERVICES</p>
-              <a className="mt-8 hidden items-center gap-2 text-sm font-bold underline underline-offset-4 lg:inline-flex" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Ceritakan kebutuhan Anda <ArrowRight size={16} /></a>
+              <Link className="mt-8 hidden items-center gap-2 text-sm font-bold underline underline-offset-4 lg:inline-flex" to="/contact">Ceritakan kebutuhan Anda <ArrowRight size={16} /></Link>
             </div>
             <div>
               <h2 className="section-title max-w-4xl">Dari masalah operasional menjadi produk AI yang <span className="underline-sketch">benar-benar dipakai.</span></h2>
@@ -283,7 +307,7 @@ function App() {
               </article>
             ))}
           </div>
-          <a className="mt-8 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4 lg:hidden" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Ceritakan kebutuhan Anda <ArrowRight size={16} /></a>
+          <Link className="mt-8 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4 lg:hidden" to="/contact">Ceritakan kebutuhan Anda <ArrowRight size={16} /></Link>
         </div>
       </section>
 
@@ -337,7 +361,7 @@ function App() {
 
           <div className="mt-10 flex flex-col items-start justify-between gap-6 rounded-xl border border-white/10 bg-midnight p-6 sm:flex-row sm:items-center md:p-8">
             <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow">Punya use case berbeda?</p><p className="mt-2 text-xl font-semibold">Kita bisa mulai dari discovery sprint selama 1–2 minggu.</p></div>
-            <a className="button button-light shrink-0" href="mailto:hello@vibefromcafe.id?subject=AI%20Discovery%20Sprint">Book discovery call <ArrowRight size={16} /></a>
+            <Link className="button button-light shrink-0" to="/contact">Book discovery call <ArrowRight size={16} /></Link>
           </div>
         </div>
       </section>
@@ -376,34 +400,34 @@ function App() {
           <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
               <p className="section-label text-yellow">/ FIND YOUR PEOPLE</p>
-              <h2 className="section-title mt-5 max-w-3xl">Your local chapter is already brewing.</h2>
+              <h2 className="section-title mt-5 max-w-3xl">Your chapter is already brewing.</h2>
             </div>
-            <p className="max-w-sm leading-7 text-white/55">Small enough to know names. Big enough to meet someone who changes how you work.</p>
+            <p className="max-w-sm leading-7 text-white/55">Local chapters and groups for builders who want to learn, ship, and share what works.</p>
           </div>
 
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
             {chapters.map((chapter, index) => (
-              <article key={chapter.city} className="chapter-card group">
+              <article key={chapter.name} className="chapter-card group">
                 <div className={`h-2 ${chapter.tone}`} />
                 <div className="p-7">
                   <div className="flex items-start justify-between">
                     <span className="font-mono text-xs uppercase tracking-[.18em] text-white/45">Chapter 0{index + 1}</span>
                     <ArrowRight className="transition-transform group-hover:translate-x-1" size={20} />
                   </div>
-                  <h3 className="mt-10 text-4xl font-bold">{chapter.city}</h3>
-                  <div className="mt-8 flex gap-3 text-xs text-white/55">
-                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.spots}</span>
-                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.people}</span>
+                  <h3 className="mt-10 text-4xl font-bold">{chapter.name}</h3>
+                  <div className="mt-8 flex flex-wrap gap-3 text-xs text-white/55">
+                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.scope}</span>
+                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.detail}</span>
                   </div>
                   <div className="mt-7 border-t border-white/10 pt-5">
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-white/35">Next gathering</p>
-                    <p className="mt-2 flex items-center gap-2 text-sm"><span className="size-2 rounded-full bg-yellow" /> {chapter.next}</p>
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-white/35">Group status</p>
+                    <p className="mt-2 flex items-center gap-2 text-sm"><span className="size-2 rounded-full bg-yellow" /> Active group</p>
                   </div>
                 </div>
               </article>
             ))}
           </div>
-          <a className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-yellow" href="#join">Explore all six chapters <ChevronRight size={16} /></a>
+          <Link className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-yellow" to="/chapters">Explore all groups <ChevronRight size={16} /></Link>
         </div>
       </section>
 
@@ -450,7 +474,7 @@ function App() {
         </div>
       </section>
 
-      <section className="border-y border-black/10 bg-paper py-24 text-midnight md:py-28">
+      <section className="border-t border-black/10 bg-paper py-24 text-midnight md:py-28">
         <div className="page-shell grid gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
           <blockquote>
             <MessageCircle className="text-yellow" size={36} fill="currentColor" />
@@ -458,7 +482,7 @@ function App() {
           </blockquote>
           <div className="lg:border-l lg:border-black/15 lg:pl-10">
             <p className="font-bold">Nadia Putri</p>
-            <p className="mt-1 text-sm text-ink-muted">Product designer · Jakarta chapter</p>
+            <p className="mt-1 text-sm text-ink-muted">Product designer · Jabodetabek group</p>
           </div>
         </div>
       </section>
@@ -471,21 +495,45 @@ function App() {
           <h2 className="mx-auto mt-8 max-w-4xl text-5xl font-bold leading-[.98] tracking-[-.05em] sm:text-6xl md:text-7xl">Come to learn. Stay to build something real.</h2>
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-black/65">Bergabung dengan komunitas atau ajak kami membangun solusi AI untuk bisnis Anda. Dua pintu, satu ekosistem.</p>
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <a className="button button-dark" href="mailto:hello@vibefromcafe.id?subject=AI%20Project%20Inquiry">Start an AI project <ArrowRight size={18} /></a>
-            <a className="button button-outline-dark" href="#chapters">Join the community</a>
+            <Link className="button button-dark" to="/contact">Start an AI project <ArrowRight size={18} /></Link>
+            <Link className="button button-outline-dark" to="/join">Join the community</Link>
           </div>
         </div>
       </section>
 
-      <footer className="bg-midnight py-10 text-white">
-        <div className="page-shell flex flex-col justify-between gap-8 sm:flex-row sm:items-center">
-          <BrandMark compact />
-          <p className="font-mono text-[10px] uppercase tracking-[.18em] text-white/35">Built in cafes across Indonesia · 2026</p>
-          <div className="flex gap-6 text-sm text-white/55"><a className="hover:text-yellow" href="#top">Instagram</a><a className="hover:text-yellow" href="#top">LinkedIn</a></div>
+      <footer className="border-t border-white/10 bg-[#050505] py-16 text-white md:py-20">
+        <div className="page-shell">
+          <div className="grid gap-12 md:grid-cols-[1.2fr_.8fr_.9fr]">
+            <div>
+              <Link className="text-2xl font-bold text-yellow" to="/">Vibe Coding From Cafe</Link>
+              <p className="mt-7 max-w-md text-lg leading-8 text-white/50">A support system for tech workers navigating the AI shift -- sambil ngopi bareng.</p>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Navigate</h2>
+              <nav className="mt-6 flex flex-col items-start gap-4 text-lg text-white/45" aria-label="Footer navigation">
+                {footerNavigation.map((item) => (
+                  'href' in item ? (
+                    <a key={item.label} className="hover:text-yellow" href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>{item.label}</a>
+                  ) : (
+                    <Link key={item.label} className="hover:text-yellow" to={item.to}>{item.label}</Link>
+                  )
+                ))}
+              </nav>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Connect</h2>
+              <div className="mt-6 flex flex-col items-start gap-4 text-lg text-white/45">
+                {footerConnect.map((item) => (
+                  <a key={item.label} className="hover:text-yellow" href={item.href} target="_blank" rel="noreferrer">{item.label}</a>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-16 border-t border-white/10 pt-10 text-center text-lg text-white/40">
+            Vibe Coding From Cafe -- Made with warmth from Indonesia.
+          </div>
         </div>
       </footer>
     </main>
   )
 }
-
-export default App
