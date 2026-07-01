@@ -7,4 +7,4 @@ WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding
 
 [[kv_namespaces]]
 binding = "VFC_SUBMISSIONS"
-id = "REPLACE_WITH_STAGING_KV_NAMESPACE_ID"
+id = "a029701ae4b4485c80ad7579c84f3565"

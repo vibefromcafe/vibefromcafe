@@ -1,0 +1,7 @@
+/cafes https://cafein.id 302
+/cafes/* https://cafein.id/:splat 302
+/chapter /chapters 302
+/event /events 302
+/join-community /join 302
+/join-comunity /join 302
+
