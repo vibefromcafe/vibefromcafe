@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildInventory, buildReconciliation, categoryForKey, parseArgs, validateMigrationPreflight, validateNoImplicitEnvironment } from "./kv-cutover.mjs";
+import { buildInventory, buildReconciliation, categoryForKey, parseArgs, runLiveDestinationPreflight, validateLiveDestinationPreflight, validateMigrationPreflight, validateNoImplicitEnvironment } from "./kv-cutover.mjs";
 
 // Kept outside Vitest's *.test.* glob because these tests use Node's test runner.
 
@@ -74,4 +74,55 @@ test("migration preflight requires an empty independently authorized staging tar
 test("remote commands reject implicit Cloudflare environment selection", () => {
   assert.doesNotThrow(() => validateNoImplicitEnvironment({}));
   assert.throws(() => validateNoImplicitEnvironment({ CLOUDFLARE_ENV: "production" }), /must be unset/);
+});
+
+test("live preflight refuses a stale empty snapshot when destination is now non-empty", () => {
+  const destinationBefore = snapshot("staging", [], "staging-id");
+  const liveDestination = snapshot("staging", [{ key: "new-record", value: "" }], "staging-id");
+  assert.throws(
+    () => validateLiveDestinationPreflight({ destinationBefore, liveDestination, destinationId: "staging-id" }),
+    /changed since authorization or is non-empty/,
+  );
+});
+
+test("live preflight refuses destination identity drift", () => {
+  assert.throws(
+    () => validateLiveDestinationPreflight({
+      destinationBefore: snapshot("staging", [], "staging-id"),
+      liveDestination: snapshot("staging", [], "different-id"),
+      destinationId: "staging-id",
+    }),
+    /identity does not match/,
+  );
+});
+
+test("live preflight refuses malformed listing drift", () => {
+  assert.throws(
+    () => validateLiveDestinationPreflight({
+      destinationBefore: snapshot("staging", [], "staging-id"),
+      liveDestination: { ...snapshot("staging", [], "staging-id"), records: null },
+      destinationId: "staging-id",
+    }),
+    /invalid record listing/,
+  );
+});
+
+test("live preflight fails closed when destination fetch fails", () => {
+  assert.throws(
+    () => runLiveDestinationPreflight({
+      readLiveDestination: () => { throw new Error("synthetic fetch failure"); },
+      destinationBefore: snapshot("staging", [], "staging-id"),
+      destinationId: "staging-id",
+    }),
+    /fetch failed; no write attempted/,
+  );
+});
+
+test("live preflight accepts and returns an unchanged empty destination", () => {
+  const liveDestination = snapshot("staging", [], "staging-id");
+  assert.equal(runLiveDestinationPreflight({
+    readLiveDestination: () => liveDestination,
+    destinationBefore: snapshot("staging", [], "staging-id"),
+    destinationId: "staging-id",
+  }), liveDestination);
 });

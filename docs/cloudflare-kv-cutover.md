@@ -135,7 +135,8 @@ pnpm kv:cutover migrate \
   --destination-alias staging \
   --destination-config /secure/config/staging.toml \
   --destination-before .kv-cutover/staging-before.json \
-  --authorization /secure/config/staging-authorization.json
+  --authorization /secure/config/staging-authorization.json \
+  --live-prewrite-output .kv-cutover/staging-live-prewrite.json
 ```
 
 Then execute only against staging:
@@ -147,9 +148,18 @@ pnpm kv:cutover migrate \
   --destination-config /secure/config/staging.toml \
   --destination-before .kv-cutover/staging-before.json \
   --authorization /secure/config/staging-authorization.json \
+  --live-prewrite-output .kv-cutover/staging-live-prewrite.json \
   --execute --writes-frozen \
   --confirm "WRITE VERIFIED NON-PRODUCTION staging"
 ```
+
+Execution performs another remote key listing against the exact authorized
+namespace immediately before bulk put. It compares that live state to the
+authorized empty snapshot and aborts on any key, identity drift, malformed
+response, or fetch failure. Only a matching zero-record state is retained at the
+new, non-overwriting `--live-prewrite-output` path; failure to retain it also
+aborts before mutation. KV has no list-and-put transaction, so keeping all staging
+writers frozen remains mandatory until post-write reconciliation completes.
 
 Capture staging and reconcile it with the source export:
 
@@ -177,7 +187,8 @@ test the staging application manually:
    staging join form. Confirm writes appear only in `staging`, then remove the
    synthetic records. Never use a real phone number or personal record.
 5. Repeat capture/reconciliation after synthetic cleanup. Retain the report as
-   rehearsal evidence. A write command alone is not evidence of success.
+   rehearsal evidence together with `staging-before` and
+   `staging-live-prewrite`. A write command alone is not evidence of success.
 
 ## 3. Production cutover (requires separate explicit approval)
 

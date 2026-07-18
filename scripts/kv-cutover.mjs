@@ -25,6 +25,7 @@ Commands:
   inventory --input <snapshot.json> [--output <redacted-report.json>]
   migrate   --input <snapshot.json> --destination-alias staging --destination-config <wrangler.toml>
             --destination-before <snapshot.json> --authorization <private-authorization.json>
+            --live-prewrite-output <new-snapshot.json>
             [--execute --writes-frozen --confirm "WRITE VERIFIED NON-PRODUCTION staging"]
   reconcile --source <snapshot.json> --destination <snapshot.json> [--output <redacted-report.json>]
 
@@ -247,6 +248,13 @@ function writePrivateJson(path, value) {
   chmodSync(absolute, 0o600);
 }
 
+function writeNewPrivateJson(path, value) {
+  const absolute = resolve(path);
+  mkdirSync(dirname(absolute), { recursive: true, mode: 0o700 });
+  writeFileSync(absolute, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600, flag: "wx" });
+  chmodSync(absolute, 0o600);
+}
+
 function extractNamespaceId(configPath, binding) {
   const config = readFileSync(resolve(configPath), "utf8");
   const blocks = config.split(/(?=\[\[kv_namespaces\]\])/g);
@@ -345,12 +353,40 @@ export function validateMigrationPreflight({ source, destinationBefore, authoriz
   }
 }
 
+export function validateLiveDestinationPreflight({ destinationBefore, liveDestination, destinationId }) {
+  if (liveDestination.namespaceId !== destinationId || destinationBefore.namespaceId !== destinationId) {
+    throw new Error("Live destination identity does not match the explicitly authorized namespace");
+  }
+  if (liveDestination.alias !== "staging") {
+    throw new Error("Live destination preflight must identify staging");
+  }
+  if (!Array.isArray(liveDestination.records)) {
+    throw new Error("Live destination preflight returned an invalid record listing");
+  }
+  const reconciliation = buildReconciliation(destinationBefore, liveDestination);
+  if (liveDestination.records.length !== 0 || !reconciliation.matches) {
+    throw new Error("Live destination changed since authorization or is non-empty; no write attempted");
+  }
+}
+
+export function runLiveDestinationPreflight({ readLiveDestination, destinationBefore, destinationId }) {
+  let liveDestination;
+  try {
+    liveDestination = readLiveDestination();
+  } catch {
+    throw new Error("Live destination preflight fetch failed; no write attempted");
+  }
+  validateLiveDestinationPreflight({ destinationBefore, liveDestination, destinationId });
+  return liveDestination;
+}
+
 function migrate(options) {
   const input = requireOption(options, "input");
   const destinationAlias = requireOption(options, "destination-alias");
   const destinationConfig = requireOption(options, "destination-config");
   const destinationBeforePath = requireOption(options, "destination-before");
   const authorizationPath = requireOption(options, "authorization");
+  const livePrewriteOutput = requireOption(options, "live-prewrite-output");
   const binding = typeof options.binding === "string" ? options.binding : "VFC_SUBMISSIONS";
   if (destinationAlias !== "staging") throw new Error("Automated migration is restricted to staging; production writes require a separate reviewed plan after approval");
   const snapshot = readJson(input);
@@ -366,10 +402,26 @@ function migrate(options) {
   }
   if (!options["writes-frozen"]) throw new Error("Execution requires --writes-frozen after disabling all staging writers");
   if (options.confirm !== "WRITE VERIFIED NON-PRODUCTION staging") throw new Error("Execution requires --confirm \"WRITE VERIFIED NON-PRODUCTION staging\"");
+  const liveDestination = runLiveDestinationPreflight({
+    destinationBefore,
+    destinationId,
+    readLiveDestination: () => {
+      const listed = JSON.parse(wrangler(["kv", "key", "list", ...wranglerTargetArgs(destinationConfig, destinationId)]));
+      if (!Array.isArray(listed)) throw new Error("Invalid Wrangler key listing");
+      return {
+        formatVersion: 1,
+        alias: "staging",
+        capturedAt: new Date().toISOString(),
+        namespaceId: destinationId,
+        records: listed.map((entry) => ({ key: entry.name, value: "" })),
+      };
+    },
+  });
+  writeNewPrivateJson(livePrewriteOutput, liveDestination);
   const bulkPath = `${input}.bulk-put.json`;
   writePrivateJson(bulkPath, snapshot.records);
   wrangler(["kv", "bulk", "put", resolve(bulkPath), ...wranglerTargetArgs(destinationConfig, destinationId)]);
-  console.log(JSON.stringify({ ...plan, dryRun: false, bulkFile: resolve(bulkPath), reconciliationRequired: true }, null, 2));
+  console.log(JSON.stringify({ ...plan, dryRun: false, livePrewriteCapture: resolve(livePrewriteOutput), bulkFile: resolve(bulkPath), reconciliationRequired: true }, null, 2));
 }
 
 function reconcile(options) {
