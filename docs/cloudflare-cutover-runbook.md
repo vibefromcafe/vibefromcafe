@@ -49,8 +49,8 @@ backups in the private operator register.
 
 ## Phase 0 — preconditions, approvals, and freeze plan
 
-**Operator:** `<CUTOVER_COMMANDER>` with every named owner.  
-**Expected:** every item below is signed and linked to retained evidence.  
+**Operator:** `<CUTOVER_COMMANDER>` with every named owner.
+**Expected:** every item below is signed and linked to retained evidence.
 **Abort gate:** any unchecked, unknown, stale, or contradictory item is **NO-GO**.
 
 1. All native blockers in the [inventory](cloudflare-cutover-inventory.md) are
@@ -101,9 +101,9 @@ test -z "$(git status --porcelain)" || {
 ## Phase 1 — isolated staging deploy
 
 **Operator:** `<DEPLOY_OPERATOR>`; binding verification witnessed by
-`<DATA_OWNER>` and Access by `<SECURITY_OWNER>`.  
+`<DATA_OWNER>` and Access by `<SECURITY_OWNER>`.
 **Expected:** staging commit equals the candidate; it has a distinct non-production
-KV binding and matching staging Access configuration; production is unchanged.  
+KV binding and matching staging Access configuration; production is unchanged.
 **Abort gate:** binding identity is shared/unknown, a hostname is missing from
 Access, Preview mutations are enabled, or deploy commit/build differs.
 
@@ -141,10 +141,10 @@ contains a private immutable alias.
 
 ## Phase 2 — #4 data rehearsal in staging
 
-**Operator:** `<DATA_OPERATOR>` with `<DATA_OWNER>`.  
+**Operator:** `<DATA_OPERATOR>` with `<DATA_OWNER>`.
 **Expected:** PR #18 formatVersion 1 source/staging counts and hashes reconcile;
 sample fields/statuses/IDs are unchanged; tombstoned seeds stay absent; synthetic
-writes land only in staging and are removed.  
+writes land only in staging and are removed.
 **Abort gate:** any unknown/malformed record without a decision, count/hash/sample
 mismatch, reappearing tombstone, non-empty target, target drift, unknown writer,
 production binding, or inability to clean up synthetic data.
@@ -178,9 +178,9 @@ remove synthetic data and reconcile again. Never screenshot records.
 
 ## Phase 3 — route, security, form, accessibility, and SEO staging matrix
 
-**Operators:** `<QA_OPERATOR>`, `<SECURITY_OWNER>`, `<CONTENT_OWNER>`.  
+**Operators:** `<QA_OPERATOR>`, `<SECURITY_OWNER>`, `<CONTENT_OWNER>`.
 **Expected:** every row passes on the direct staging host and every inventoried
-alias; edge/direct navigation agree.  
+alias; edge/direct navigation agree.
 **Abort gate:** any auth bypass, production write/read, secret in browser storage
 or logs, failed public flow, wrong brand, soft 404, redirect mismatch, inaccessible
 key flow, missing canonical/noindex control, or unresolved owner row.
@@ -242,9 +242,9 @@ Additional required matrix:
 
 ## Phase 4 — DNS TTL preparation and change freeze
 
-**Operator:** `<DNS_OPERATOR>` witnessed by `<SECOND_OPERATOR>`.  
+**Operator:** `<DNS_OPERATOR>` witnessed by `<SECOND_OPERATOR>`.
 **Expected:** approved low TTL has propagated before freeze; exact before-state
-and rollback target are retained; TLS can activate on replacement.  
+and rollback target are retained; TLS can activate on replacement.
 **Abort gate:** incomplete before-state, unpropagated TTL, conflicting custom
 domain, pending/failed certificate, DNSSEC uncertainty, active unauthorized
 change, or `www` policy unresolved.
@@ -273,9 +273,9 @@ done | tee "$EVIDENCE_ROOT/dns-preflight.txt"
 
 ## Phase 5 — final frozen export and reconciliation
 
-**Operator:** `<DATA_OPERATOR>` witnessed by `<DATA_OWNER>`.  
+**Operator:** `<DATA_OPERATOR>` witnessed by `<DATA_OWNER>`.
 **Expected:** all public/admin writers are disabled, two frozen `source` captures
-reconcile exactly, and the chosen namespace/write route is signed.  
+reconcile exactly, and the chosen namespace/write route is signed.
 **Abort gate:** any write after freeze, captures differ, alert/logging unavailable,
 unknown writer, malformed uncertainty, or final export cannot be retained.
 
@@ -293,10 +293,10 @@ unknown writer, malformed uncertainty, or final export cannot be retained.
 
 ### Mandatory replacement production-candidate gate
 
-**Operator:** `<DEPLOY_OPERATOR>` witnessed by `<SECOND_OPERATOR>`.  
+**Operator:** `<DEPLOY_OPERATOR>` witnessed by `<SECOND_OPERATOR>`.
 **Expected:** the exact reviewed candidate commit/build exists on the replacement
 production project with all writers disabled and can be tested on its direct
-hosts before any domain action.  
+hosts before any domain action.
 **Abort gate:** stale/different commit, unknown deployment mechanism, production
 write enabled, effective binding/variable/rule/Access mismatch, untested direct
 host, or no compatible static rollback deployment.
@@ -314,10 +314,10 @@ rollback deployment. Keep public/admin writers disabled. `<DEPLOY_OPERATOR>` and
 ## Phase 6 — custom-domain cutover
 
 **Operators:** `<DNS_OPERATOR>` and `<DEPLOY_OPERATOR>` with
-`<CUTOVER_COMMANDER>` verbal confirmation at each gate.  
+`<CUTOVER_COMMANDER>` verbal confirmation at each gate.
 **Expected:** only the reviewed replacement deployment owns the custom domain;
 TLS is active; all production deployments/writers point to the single signed
-namespace before writes resume.  
+namespace before writes resume.
 **Abort gate:** wrong deployment/commit/binding, custom-domain conflict, TLS not
 active, DNS divergence beyond `2 × captured TTL`, Access coverage gap, or more
 than one write namespace.
@@ -339,10 +339,10 @@ No shell mutation is provided. Use Cloudflare Dashboard:
 ## Phase 7 — post-cutover smoke and monitoring
 
 **Operators:** `<QA_OPERATOR>`, `<SECURITY_OWNER>`, `<DATA_OWNER>`,
-`<MONITORING_OWNER>`.  
+`<MONITORING_OWNER>`.
 **Expected:** route/security/data matrices pass through apex and every supported
 host; metrics stay within approved thresholds; one authorized synthetic write
-lands only in the chosen namespace and is cleaned up.  
+lands only in the chosen namespace and is cleaned up.
 **Abort gate:** any threshold below or any Phase 3 regression.
 
 Repeat all Phase 3 checks against apex, `www` if supported, canonical Pages host,
@@ -470,7 +470,7 @@ records, identities, credentials, group links, namespace IDs, or Access values.
 
 ## Staging rehearsal report — current state
 
-**Report date:** 2026-07-18  
+**Report date:** 2026-07-18
 **Result:** **NOT RUN / BLOCKED**
 
 ### What was run read-only
