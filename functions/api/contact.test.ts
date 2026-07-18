@@ -69,4 +69,29 @@ describe("contact api", () => {
 
     expect(response.status).toBe(400);
   });
+
+  it("rejects null JSON with correlation", async () => {
+    const response = await onRequestPost(createContext({
+      request: new Request("https://example.com/api/contact", { method: "POST", body: "null" }),
+      env: { VFC_SUBMISSIONS: new MockKvNamespace() },
+    }));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("X-Request-Id")).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it("returns a PII-safe correlated failure when KV rejects the write", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const response = await onRequestPost(createContext({
+      request: new Request("https://example.com/api/contact", {
+        method: "POST",
+        body: JSON.stringify({ name: "Private Name", contact: "private@example.com", message: "Private inquiry" }),
+      }),
+      env: { VFC_SUBMISSIONS: { put: vi.fn(async () => { throw new Error("secret backend detail"); }) } },
+    }));
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-Request-Id")).toMatch(/^[0-9a-f-]{36}$/);
+    expect(String(error.mock.calls[0][0])).not.toMatch(/Private Name|private@example.com|Private inquiry|backend detail/);
+  });
 });

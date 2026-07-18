@@ -105,4 +105,51 @@ describe("join api", () => {
     expect(stored.invitationStatus).toBe("signed_up");
     expect(stored.invited_at).toBeUndefined();
   });
+
+  it("returns a correlated safe failure when KV rejects the write", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const response = await onRequestPost(
+      createContext({
+        request: new Request("https://example.com/api/join", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "X-Request-Id": "123e4567-e89b-42d3-a456-426614174000",
+          },
+          body: JSON.stringify({
+            name: "Must Not Appear",
+            city: "Private City",
+            role: "Private Role",
+            whatsapp: "08123456789",
+            referralSource: "private-referral",
+          }),
+        }),
+        env: {
+          VFC_SUBMISSIONS: {
+            put: vi.fn(async () => { throw new Error("KV backend secret detail"); }),
+          },
+        },
+      }),
+    );
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-Request-Id")).toBe("123e4567-e89b-42d3-a456-426614174000");
+    await expect(response.json()).resolves.toEqual({
+      error: "Submission could not be saved",
+      requestId: "123e4567-e89b-42d3-a456-426614174000",
+    });
+    const output = String(error.mock.calls[0][0]);
+    expect(output).toContain("submission_write_failed");
+    expect(output).not.toMatch(/Must Not Appear|Private City|Private Role|08123456789|private-referral|backend secret/);
+  });
+
+  it.each(["null", "[]"])("rejects non-object JSON %s with correlation", async (body) => {
+    const response = await onRequestPost(createContext({
+      request: new Request("https://example.com/api/join", { method: "POST", body }),
+      env: { VFC_SUBMISSIONS: new MockKvNamespace() },
+    }));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("X-Request-Id")).toMatch(/^[0-9a-f-]{36}$/);
+  });
 });

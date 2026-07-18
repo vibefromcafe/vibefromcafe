@@ -50,7 +50,8 @@ Key prefixes:
 - `submission:{id}` for community join submissions
 - `inquiry:{id}` for project inquiries
 - `event:{id}` for event overrides and custom events
-- `event_deleted:{id}` for seed event deletion markers
+- `event-deleted:{id}` for runtime seed event deletion markers
+- `event_deleted:{id}` is a legacy variant covered by production inventory
 
 Seed event data lives in `app/data/events.json`. Deprecated cafe support data lives in `app/data/cafes.json` and is only used for chapter context.
 
@@ -74,6 +75,10 @@ WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding
 ```
 
 Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests.
+
+Backup ownership, RPO/RTO, restore rehearsal, PII-safe logging, alert interfaces,
+admin mutation history, and the KV consistency decision are documented in
+[Recovery, observability, and admin history operations](docs/recovery-observability.md).
 
 ## Development
 

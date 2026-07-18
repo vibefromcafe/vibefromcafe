@@ -51,7 +51,7 @@ export function EventForm({ initialValue, submitLabel, onSubmit }: { initialValu
 
   return (
     <form className="dark-card space-y-5" onSubmit={submit}>
-      <label className="form-field">ID<input value={form.id} onChange={(event) => updateField("id", event.target.value)} placeholder="Optional on create" /></label>
+      {initialValue ? <label className="form-field">ID<input readOnly value={form.id} /></label> : null}
       <label className="form-field">Title<input required value={form.title} onChange={(event) => updateField("title", event.target.value)} /></label>
       <label className="form-field">Description<textarea required rows={5} value={form.description} onChange={(event) => updateField("description", event.target.value)} /></label>
       <div className="grid gap-4 md:grid-cols-2">

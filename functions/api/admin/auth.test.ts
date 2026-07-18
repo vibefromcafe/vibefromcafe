@@ -75,6 +75,7 @@ beforeAll(async () => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 function serveJwks() {
@@ -210,5 +211,29 @@ describe("admin route middleware", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Admin mutations are disabled in this environment",
     });
+  });
+
+  it("correlates auth failures without logging credentials", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const response = await apiAdminMiddleware({
+      request: new Request("https://example.com/api/admin/events", {
+        headers: {
+          "X-Request-Id": "123e4567-e89b-42d3-a456-426614174000",
+          "X-Admin-Secret": "must-never-be-logged",
+        },
+      }),
+      env: environment(),
+      params: {},
+      data: {},
+      next: vi.fn(async () => new Response("unexpected")),
+      waitUntil: vi.fn(),
+      functionPath: "/api/admin/events",
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.headers.get("X-Request-Id")).toBe("123e4567-e89b-42d3-a456-426614174000");
+    const output = String(warn.mock.calls[0][0]);
+    expect(output).toContain("admin_auth_failed");
+    expect(output).not.toContain("must-never-be-logged");
   });
 });
