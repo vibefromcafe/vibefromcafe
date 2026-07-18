@@ -116,13 +116,17 @@ export async function getEventById(env: Env, id: string) {
   return seedRecord ? normalizeEventStatus(seedRecord) : null;
 }
 
-export async function saveEvent(env: Env, event: Event) {
+export async function saveEvent(env: Env, event: Event, actor: string) {
   const normalizedEvent = normalizeEventStatus(event);
-  await env.VFC_SUBMISSIONS.put(`${EVENT_PREFIX}${normalizedEvent.id}`, JSON.stringify(normalizedEvent));
+  await env.VFC_SUBMISSIONS.put(
+    `${EVENT_PREFIX}${normalizedEvent.id}`,
+    JSON.stringify(normalizedEvent),
+    { metadata: { updatedBy: actor, updatedAt: new Date().toISOString() } },
+  );
   await env.VFC_SUBMISSIONS.delete(`${EVENT_DELETED_PREFIX}${normalizedEvent.id}`);
 }
 
-export async function removeEvent(env: Env, id: string) {
+export async function removeEvent(env: Env, id: string, actor: string) {
   const normalizedId = id.trim();
   if (!normalizedId) {
     return false;
@@ -133,11 +137,11 @@ export async function removeEvent(env: Env, id: string) {
     return false;
   }
 
-  await env.VFC_SUBMISSIONS.delete(`${EVENT_PREFIX}${normalizedId}`);
   await env.VFC_SUBMISSIONS.put(
     `${EVENT_DELETED_PREFIX}${normalizedId}`,
-    JSON.stringify({ deletedAt: new Date().toISOString() }),
+    JSON.stringify({ deletedAt: new Date().toISOString(), deletedBy: actor }),
   );
+  await env.VFC_SUBMISSIONS.delete(`${EVENT_PREFIX}${normalizedId}`);
 
   return true;
 }

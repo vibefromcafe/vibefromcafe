@@ -56,6 +56,8 @@ export interface Submission {
   invited_at?: string;
   approved_by?: string;
   approved_at?: string;
+  updated_by?: string;
+  updated_at?: string;
   createdAt: string;
 }
 
