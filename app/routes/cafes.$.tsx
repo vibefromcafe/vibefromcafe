@@ -186,17 +186,14 @@ function LegacyCafePage({
 
         <div className="mt-10 flex flex-wrap gap-3">
           <a
-            className="inline-flex rounded-lg bg-yellow px-5 py-3 font-bold text-midnight"
+            className="button button-primary"
             href={CAFEIN_ORIGIN}
             target="_blank"
             rel="noreferrer"
           >
             Browse cafes on cafein.id
           </a>
-          <Link
-            className="inline-flex rounded-lg border border-white/15 px-5 py-3 font-semibold text-white/80"
-            to="/"
-          >
+          <Link className="button button-ghost" to="/">
             Back to Vibe From Cafe
           </Link>
         </div>
@@ -236,10 +233,7 @@ function RedirectNotice({
           {name} now lives on cafein.id. You are being redirected to the matching
           cafe page.
         </p>
-        <a
-          className="mt-8 inline-flex rounded-lg bg-yellow px-5 py-3 font-bold text-midnight"
-          href={destinationUrl}
-        >
+        <a className="button button-primary mt-8" href={destinationUrl}>
           Continue to cafein.id
         </a>
       </div>
@@ -260,16 +254,10 @@ function NotFoundPage({ slug }: { slug: string }) {
           the archived Vibe From Cafe directory.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a
-            className="inline-flex rounded-lg bg-yellow px-5 py-3 font-bold text-midnight"
-            href={CAFEIN_ORIGIN}
-          >
+          <a className="button button-primary" href={CAFEIN_ORIGIN}>
             Browse cafein.id
           </a>
-          <Link
-            className="inline-flex rounded-lg border border-white/15 px-5 py-3 font-semibold text-white/80"
-            to="/"
-          >
+          <Link className="button button-ghost" to="/">
             Home
           </Link>
         </div>

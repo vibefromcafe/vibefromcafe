@@ -24,10 +24,7 @@ export default function CafesIndexRedirect() {
           Vibe From Cafe discovery now lives on cafein.id. You are being redirected
           to the cafe directory.
         </p>
-        <a
-          className="mt-8 inline-flex rounded-lg bg-yellow px-5 py-3 font-bold text-midnight"
-          href={destination}
-        >
+        <a className="button button-primary mt-8" href={destination}>
           Open cafein.id
         </a>
         <p className="mt-4 text-sm text-white/40">

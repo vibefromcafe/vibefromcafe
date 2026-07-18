@@ -52,7 +52,31 @@ describe("cafe URL migration inventory", () => {
       expect(entry.destinationUrl).not.toMatch(
         new RegExp(`${CAFEIN_ORIGIN}/[^/]+$`),
       );
+      expect([
+        "exact_slug",
+        "normalized_name_location",
+        "unique_nationwide_name",
+      ]).toContain(entry.matchMethod);
     }
+  });
+
+  it("uses unique_nationwide_name when location did not contribute (canie)", () => {
+    const canie = mapping.entries.find((entry) => entry.legacySlug === "canie");
+    expect(canie?.matchMethod).toBe("unique_nationwide_name");
+    expect(canie?.legacyMapLocation).toBeNull();
+    expect(canie?.redirect).toBe(true);
+    expect(canie?.cafeinSlug).toBe("canie-coffee-space");
+  });
+
+  it("records that per-URL traffic/indexing relevance is unavailable", () => {
+    expect(mapping.trafficAndIndexing.perUrlRelevanceAvailable).toBe(false);
+    expect(mapping.trafficAndIndexing.status).toBe("unavailable");
+    expect(mapping.trafficAndIndexing.ownerVerificationSteps.length).toBeGreaterThanOrEqual(2);
+    const systems = mapping.trafficAndIndexing.ownerVerificationSteps.map(
+      (step) => step.system,
+    );
+    expect(systems.some((name) => /Cloudflare/i.test(name))).toBe(true);
+    expect(systems.some((name) => /Search Console/i.test(name))).toBe(true);
   });
 
   it("never redirects two legacy slugs to the same cafein slug collision risk without review", () => {

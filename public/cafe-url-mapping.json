@@ -10,7 +10,7 @@
     301,
     308
   ],
-  "permanentRedirectRecommendation": "Promote verified mappings from 302 to 301/308 only after owner sign-off on this file, production smoke checks that every verified destination returns HTTP 200 on cafein.id (not a client 404 shell), and analytics show no material mismatch reports for 14 days.",
+  "permanentRedirectRecommendation": "Promote verified mappings from 302 to 301/308 only after: (1) owner sign-off on this file including the 8 legacy-fallback rows, (2) preview/production smoke checks that every verified destination returns a real cafein detail (not a client 404 shell) and unknown slugs 404, (3) owner completes the Cloudflare Analytics + Search Console verification steps in trafficAndIndexing (per-URL relevance is currently unavailable), and (4) post-cutover monitoring for ~14 days shows no material mismatch/404 spikes for redirected slugs.",
   "queryStringPolicy": "Preserve the original request query string on redirects to cafein.id when the edge/_redirects or Pages Function issues the Location header.",
   "counts": {
     "totalLegacySlugs": 56,
@@ -26,13 +26,17 @@
     "supabaseHost": "bqnxoanuoguegyfxcgrk.supabase.co",
     "matchedBy": [
       "exact slug",
-      "normalized name",
-      "map_location/address phrase",
-      "unique nationwide name"
+      "normalized name + address/location/map phrase",
+      "unique nationwide name (no competing branches; location may be absent)"
     ],
     "notUsed": [
       "guessing",
       "weak single-token name similarity without location or uniqueness"
+    ],
+    "matchMethodValues": [
+      "exact_slug",
+      "normalized_name_location",
+      "unique_nationwide_name"
     ]
   },
   "entries": [
@@ -154,12 +158,12 @@
       "legacyMapLocation": "https://maps.app.goo.gl/vE7AGX68orWqyHcj6?g_st=ic",
       "legacyPath": "/cafes/bloomery-cake-patisserie-jakal",
       "status": "verified",
-      "matchMethod": "normalized_name_location",
+      "matchMethod": "unique_nationwide_name",
       "cafeinSlug": "bloomery-cake-patisserie-jakal-yogyakarta",
       "cafeinPath": "/cafe/bloomery-cake-patisserie-jakal-yogyakarta",
       "destinationUrl": "https://cafein.id/cafe/bloomery-cake-patisserie-jakal-yogyakarta",
       "redirect": true,
-      "evidence": "Only Bloomery Cake & Patisserie Jakal record on cafein."
+      "evidence": "Only Bloomery Cake & Patisserie Jakal record on cafein (unique name). Legacy map_location is a maps short-link, not used as address phrase evidence."
     },
     {
       "legacySlug": "canie",
@@ -167,12 +171,12 @@
       "legacyMapLocation": null,
       "legacyPath": "/cafes/canie",
       "status": "verified",
-      "matchMethod": "normalized_name_location",
+      "matchMethod": "unique_nationwide_name",
       "cafeinSlug": "canie-coffee-space",
       "cafeinPath": "/cafe/canie-coffee-space",
       "destinationUrl": "https://cafein.id/cafe/canie-coffee-space",
       "redirect": true,
-      "evidence": "Only nationwide cafein record containing Canie."
+      "evidence": "Only nationwide cafein record containing Canie; legacy map_location is null so location could not contribute."
     },
     {
       "legacySlug": "cosan-seturan",
@@ -232,12 +236,12 @@
       "legacyMapLocation": null,
       "legacyPath": "/cafes/enyui",
       "status": "verified",
-      "matchMethod": "normalized_name_location",
+      "matchMethod": "unique_nationwide_name",
       "cafeinSlug": "enyui-coffee",
       "cafeinPath": "/cafe/enyui-coffee",
       "destinationUrl": "https://cafein.id/cafe/enyui-coffee",
       "redirect": true,
-      "evidence": "Only nationwide cafein record containing enyui/Enyui."
+      "evidence": "Only nationwide cafein record containing enyui/Enyui; legacy map_location is null so location could not contribute."
     },
     {
       "legacySlug": "eplus-co-coffee-coworking",
@@ -496,7 +500,7 @@
       "cafeinPath": "/cafe/lamanide-space-cafe",
       "destinationUrl": "https://cafein.id/cafe/lamanide-space-cafe",
       "redirect": true,
-      "evidence": "Unique Lamanide name plus Sariharjo in cafein address."
+      "evidence": "Unique Lamanide name plus legacy map_location Sariharjo present in cafein address."
     },
     {
       "legacySlug": "little-goo-eatery-playground",
@@ -813,5 +817,23 @@
       "redirect": true,
       "evidence": "Exact public slug match on cafein.id Supabase cafes catalog."
     }
-  ]
+  ],
+  "trafficAndIndexing": {
+    "perUrlRelevanceAvailable": false,
+    "status": "unavailable",
+    "blocker": "Per-URL traffic and indexing relevance for the 56 legacy /cafes/:slug paths was not available to this worker. No Cloudflare Analytics export, Web Analytics dataset, or Google Search Console property access was provided in-repo or via API credentials for vibefromcafe.id.",
+    "ownerVerificationSteps": [
+      {
+        "system": "Cloudflare Analytics / Web Analytics",
+        "where": "Cloudflare Dashboard \u2192 select vibefromcafe.id Pages/zone \u2192 Analytics & Logs (or Web Analytics)",
+        "action": "Filter path prefix /cafes for the last 90 days (or longest retained window). Export or note request counts, top legacy slugs, and 404 rates. Prioritize high-traffic verified redirects for smoke checks and high-traffic fallbacks for owner review."
+      },
+      {
+        "system": "Google Search Console",
+        "where": "Search Console property for https://vibefromcafe.id/ \u2192 Performance and Page indexing",
+        "action": "Query pages matching /cafes/ for clicks, impressions, and indexed status. Use this to rank SEO-sensitive slugs before promoting 302\u2192301/308 and to watch post-cutover coverage drops."
+      }
+    ],
+    "doNotFabricate": "Do not invent per-slug traffic ranks or indexing counts without the owner steps above."
+  }
 }

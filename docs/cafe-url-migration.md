@@ -51,17 +51,35 @@ Implementation surfaces:
 
 ## Matching rules used
 
-Verified only when identity was defensible:
+Verified only when identity was defensible. `matchMethod` values:
 
-1. Exact public cafein slug match, or
-2. Normalized name match **and** address/location/map phrase support, or
-3. Unique nationwide cafein name when the legacy record had no competing branches.
+| `matchMethod` | Meaning |
+| --- | --- |
+| `exact_slug` | Legacy slug equals a unique public cafein slug |
+| `normalized_name_location` | Normalized name match **and** address/location/map phrase support |
+| `unique_nationwide_name` | Unique nationwide cafein name with no competing branches; location may be absent |
 
 Additional hard gate before redirect: the destination cafein slug must resolve to **exactly one** public catalog row. Cafein detail loading uses `maybeSingle()`, so duplicate slugs render a broken page even when HTTP status is 200.
 
 Not used: weak single-token similarity, guessing, or redirecting to cafein root for known slugs.
 
 Verification method: read-only query of the public cafein Supabase REST catalog (publishable frontend key) against DIY-region and nationwide name/slug searches, plus legacy `name` / `map_location` fields.
+
+## Traffic / indexing relevance (unavailable)
+
+**Per-URL traffic and indexing relevance for the 56 legacy `/cafes/:slug` paths is not available to this worker.** No Cloudflare Analytics export, Web Analytics dataset, or Google Search Console property access was provided in-repo or via API credentials for `vibefromcafe.id`. Do **not** fabricate per-slug ranks or impression counts.
+
+### Exact owner verification steps
+
+1. **Cloudflare Analytics / Web Analytics**  
+   Cloudflare Dashboard → select the `vibefromcafe.id` Pages project / zone → **Analytics & Logs** (or **Web Analytics**).  
+   Filter path prefix `/cafes` for the longest retained window (prefer 90 days). Export or note request counts, top legacy slugs, and 404 rates. Use this to prioritize smoke checks (high-traffic verified redirects) and owner review (high-traffic fallbacks).
+
+2. **Google Search Console**  
+   Search Console property for `https://vibefromcafe.id/` → **Performance** and **Page indexing**.  
+   Query pages matching `/cafes/` for clicks, impressions, and indexed status. Rank SEO-sensitive slugs before promoting 302→301/308 and watch post-cutover coverage drops.
+
+These steps are also embedded in `cafe-url-mapping.json` under `trafficAndIndexing`.
 
 ## Owner-review list
 
@@ -91,20 +109,21 @@ Owner actions per row are also embedded in the JSON map (`ownerAction`).
 
 Keep **302** until all of the following are true:
 
-1. Owner signs off on `app/data/cafe-url-mapping.json` verified rows (no outstanding high-traffic mismatches).
-2. Production smoke check: every verified `destinationUrl` returns a successful cafe detail on cafein.id (not a client-side 404 shell).
-3. Post-cutover monitoring for ~14 days shows no material mismatch reports for redirected slugs (404 spikes, Search Console, analytics referrers).
-4. Ambiguous/unmatched rows are either resolved into verified mappings or explicitly marked `intentionally_retired` with a permanent legacy/fallback policy.
+1. Owner signs off on `app/data/cafe-url-mapping.json` verified rows **and** the 8 legacy-fallback rows.
+2. **Preview/production smoke** (still a blocker): every verified `destinationUrl` loads a real cafein detail (not a client 404 shell); sample ambiguous/unmatched legacy pages render; unknown `/cafes/:slug` returns HTTP 404; query strings survive redirects.
+3. Owner completes the **Cloudflare Analytics + Search Console** verification steps above (per-URL relevance is currently **unavailable**).
+4. **Post-cutover monitoring** for ~14 days shows no material mismatch reports for redirected slugs (404 spikes, Search Console coverage, analytics referrers) — still a blocker for permanent promotion.
+5. Ambiguous/unmatched rows are either resolved into verified mappings or explicitly marked `intentionally_retired` with a permanent legacy/fallback policy.
 
 Then flip verified rows (and only verified rows) from `302` → `301` or `308` in `public/_redirects` and the shared temporary status constant.
 
 ## Monitoring after cutover
 
-Track:
+**Blocker until operational:** tracking must be enabled and reviewed after deploy. At minimum:
 
-- Cloudflare / analytics 404s under `/cafes/*`
-- Referrer traffic from search to legacy cafe URLs
-- cafein destination failures for mapped slugs
+- Cloudflare Analytics / Web Analytics 404s and request volume under `/cafes/*`
+- Google Search Console performance + indexing for `/cafes/` URLs
+- cafein destination failures / support reports for mapped slugs
 - Manual hits to `/cafe-url-mapping.json` during reconciliation
 
 ## Regenerating redirects

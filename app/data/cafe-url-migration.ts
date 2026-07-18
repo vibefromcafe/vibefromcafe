@@ -53,11 +53,23 @@ export interface CafeUrlMappingDocument {
     redirecting: number;
     legacyFallback: number;
   };
+  trafficAndIndexing: {
+    perUrlRelevanceAvailable: boolean;
+    status: string;
+    blocker: string;
+    ownerVerificationSteps: Array<{
+      system: string;
+      where: string;
+      action: string;
+    }>;
+    doNotFabricate: string;
+  };
   verification: {
     method: string;
     supabaseHost: string;
     matchedBy: string[];
     notUsed: string[];
+    matchMethodValues?: string[];
   };
   entries: CafeMappingEntry[];
 }
