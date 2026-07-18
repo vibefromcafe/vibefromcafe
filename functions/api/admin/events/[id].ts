@@ -1,6 +1,7 @@
 import { parseEventInput } from "../../../../app/data/event-validation";
 import { getEventById, removeEvent, saveEvent } from "../../../../app/data/events-store";
 import type { Event } from "../../../../app/data/types";
+import type { AdminAuthData } from "../auth";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -25,7 +26,12 @@ export const onRequestGet: PagesFunction<Env, "id"> = async ({ env, params }) =>
   return Response.json({ event });
 };
 
-export const onRequestPatch: PagesFunction<Env, "id"> = async ({ request, env, params }) => {
+export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
+  const actor = data.adminActor;
+  if (!actor) {
+    return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
+  }
+
   const id = getId(params);
   if (!id) {
     return Response.json({ error: "Event id is required" }, { status: 400 });
@@ -62,18 +68,23 @@ export const onRequestPatch: PagesFunction<Env, "id"> = async ({ request, env, p
     tags: parsed.input.tags ?? existing.tags,
   };
 
-  await saveEvent(env, updated);
+  await saveEvent(env, updated, actor);
 
   return Response.json({ event: updated });
 };
 
-export const onRequestDelete: PagesFunction<Env, "id"> = async ({ env, params }) => {
+export const onRequestDelete: PagesFunction<Env, "id", AdminAuthData> = async ({ env, params, data }) => {
+  const actor = data.adminActor;
+  if (!actor) {
+    return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
+  }
+
   const id = getId(params);
   if (!id) {
     return Response.json({ error: "Event id is required" }, { status: 400 });
   }
 
-  const removed = await removeEvent(env, id);
+  const removed = await removeEvent(env, id, actor);
   if (!removed) {
     return Response.json({ error: "Event not found" }, { status: 404 });
   }

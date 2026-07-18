@@ -73,7 +73,7 @@ Variables:
 WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding From Cafe. Yuk gabung ke grup komunitas kami di sini: {{group_link}}"
 ```
 
-Admin access is protected in deployed environments by Cloudflare Access.
+Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests.
 
 ## Development
 
@@ -122,4 +122,4 @@ Cloudflare Pages should use:
 - Functions directory: `functions`
 - KV binding: `VFC_SUBMISSIONS`
 
-Use a staging Pages project and staging KV namespace first. Replace the placeholder KV namespace id in `wrangler.toml` before deploying.
+Use a staging Pages project and staging KV namespace first. Preview and Production must never share the `VFC_SUBMISSIONS` namespace. Follow the environment-specific configuration in [Admin security operations](docs/admin-security.md) before deploying.

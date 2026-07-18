@@ -1,6 +1,7 @@
 import { parseEventInput } from "../../../../app/data/event-validation";
 import { getAllEvents, getEventById, saveEvent } from "../../../../app/data/events-store";
 import type { Event } from "../../../../app/data/types";
+import type { AdminAuthData } from "../auth";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -11,7 +12,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   return Response.json({ events });
 };
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<Env, string, AdminAuthData> = async ({ request, env, data }) => {
+  const actor = data.adminActor;
+  if (!actor) {
+    return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -49,7 +55,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     createdAt: new Date().toISOString(),
   };
 
-  await saveEvent(env, event);
+  await saveEvent(env, event, actor);
 
   return Response.json({ event }, { status: 201 });
 };
