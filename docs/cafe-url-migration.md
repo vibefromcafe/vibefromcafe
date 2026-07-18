@@ -71,12 +71,14 @@ Verification method: read-only query of the public cafein Supabase REST catalog 
 
 ### Exact owner verification steps
 
-1. **Cloudflare Analytics / Web Analytics**  
-   Cloudflare Dashboard → select the `vibefromcafe.id` Pages project / zone → **Analytics & Logs** (or **Web Analytics**).  
+1. **Cloudflare Analytics / Web Analytics**
+
+   Cloudflare Dashboard → select the `vibefromcafe.id` Pages project / zone → **Analytics & Logs** (or **Web Analytics**).
    Filter path prefix `/cafes` for the longest retained window (prefer 90 days). Export or note request counts, top legacy slugs, and 404 rates. Use this to prioritize smoke checks (high-traffic verified redirects) and owner review (high-traffic fallbacks).
 
-2. **Google Search Console**  
-   Search Console property for `https://vibefromcafe.id/` → **Performance** and **Page indexing**.  
+2. **Google Search Console**
+
+   Search Console property for `https://vibefromcafe.id/` → **Performance** and **Page indexing**.
    Query pages matching `/cafes/` for clicks, impressions, and indexed status. Rank SEO-sensitive slugs before promoting 302→301/308 and watch post-cutover coverage drops.
 
 These steps are also embedded in `cafe-url-mapping.json` under `trafficAndIndexing`.
