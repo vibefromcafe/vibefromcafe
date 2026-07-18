@@ -379,7 +379,7 @@ export default function Home() {
               <p className="section-label text-yellow">/ FIND YOUR PEOPLE</p>
               <h2 className="section-title mt-5 max-w-3xl">Local circles, growing city by city.</h2>
             </div>
-            <p className="max-w-sm leading-7 text-white/55">Place-based circles for people who want to learn, ship, and share what works. Only chapters with a public path are marked open.</p>
+            <p className="max-w-sm leading-7 text-white/55">Place-based circles for people who want to learn, ship, and share what works. Status stays descriptive until chapter-specific engagement is confirmed.</p>
           </div>
 
           <div className="mt-14 grid gap-5 lg:grid-cols-3">

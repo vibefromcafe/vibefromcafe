@@ -107,7 +107,7 @@ export default function EventsPage() {
         </div>
       )}
       <div className="mt-10 grid gap-5 md:grid-cols-3">
-        {[["Build sessions", "Two focused hours to turn a useful idea into a tiny working prototype."], ["Prompt clinics", "Bring a prompt or workflow that keeps failing and debug it together."], ["Open demos", "Share unfinished work, practical lessons, and shortcuts worth passing on."]].map(([title, copy]) => <article key={title} className="dark-card"><CalendarDays className="text-yellow" /><h3 className="mt-8 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-white/50">{copy}</p></article>)}
+        {[["Build sessions", "Hands-on time to turn a useful idea into a tiny working prototype."], ["Prompt clinics", "Bring a prompt or workflow that keeps failing and debug it together."], ["Open demos", "Share unfinished work, practical lessons, and shortcuts worth passing on."]].map(([title, copy]) => <article key={title} className="dark-card"><CalendarDays className="text-yellow" /><h3 className="mt-8 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-white/50">{copy}</p></article>)}
       </div>
     </PageFrame>
   );

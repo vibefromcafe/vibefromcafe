@@ -8,7 +8,7 @@ export default function ChaptersPage() {
     <PageFrame
       eyebrow="/ FIND YOUR PEOPLE"
       title="A chapter, wherever you build."
-      intro="Local chapters and circles for people who want to learn, ship, and share what works. Member totals stay private until an owned public snapshot exists."
+      intro="Local chapters and circles for people who want to learn, ship, and share what works. Member totals stay private until an owned public snapshot exists. No chapter is labeled open or active until chapter-specific engagement is confirmed."
     >
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {publicChapters.map((chapter, index) => {
@@ -53,7 +53,7 @@ export default function ChaptersPage() {
             Start small. Join the community and tell us where you are—we will help with format and the first gathering.
           </p>
         </div>
-        <Link className="button bg-yellow text-midnight" to="/join">
+        <Link className="button button-primary" to="/join">
           Express interest <ArrowRight size={16} />
         </Link>
       </div>

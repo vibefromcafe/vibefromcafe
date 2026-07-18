@@ -2,22 +2,24 @@
  * Public-safe marketing claims for the VFC site.
  *
  * Rules (see docs/claims-source-of-truth.md):
- * - No member totals, cafe index totals, or “N active groups” without a verified register row.
+ * - No member totals, cafe index totals, or “N active groups” without a verified register row
+ *   and a confirmed human owner (not a role placeholder).
  * - Products here are service examples / concepts unless promoted in the product register.
- * - Chapter “open” requires a public engagement path; city names alone are not “active”.
+ * - Do not publish chapter “open” / “active” until a chapter-specific engagement path is
+ *   owner-confirmed. A generic /join is not enough.
  *
  * Brand rename (Vibe From Cafe / VFC) is owned by issue #2. This module avoids
  * deployment badges and quantified social proof only.
  */
 
-export type ChapterPublicStatus = "open_chapter" | "listed_circle";
+export type ChapterPublicStatus = "has_page" | "listed_circle";
 
 export type PublicChapterClaim = {
   name: string;
   scope: string;
   focus: string;
   status: ChapterPublicStatus;
-  /** Human-readable status for cards — never a member count. */
+  /** Human-readable status for cards — never a member count or active/open claim. */
   detail: string;
   tone: string;
   accent: string;
@@ -45,16 +47,17 @@ export const heroProofPoints = [
 ] as const;
 
 /**
- * Chapters listed for orientation. Member counts intentionally omitted.
- * Destinations beyond Jogja are issue #8.
+ * Chapters listed for orientation. Member counts and active/open status intentionally omitted.
+ * Destinations beyond Jogja are issue #8. Jogja has a page but chapter-specific engagement
+ * is owner-unconfirmed (generic /join only) — do not label open/active.
  */
 export const publicChapters: PublicChapterClaim[] = [
   {
     name: "Jogja",
     scope: "Yogyakarta",
-    focus: "First local chapter with a public page and community join path",
-    status: "open_chapter",
-    detail: "Open chapter",
+    focus: "Local chapter page for Yogyakarta cafe-context notes",
+    status: "has_page",
+    detail: "Chapter page",
     tone: "bg-[#f5c400]",
     accent: "#f5c400",
     to: "/chapters/jogja",
