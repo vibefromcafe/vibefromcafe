@@ -20,3 +20,6 @@ A local VCFC community group organised around a place, such as Jogja.
 
 ## Deprecated Cafe Data
 Archived cafe records copied from the upstream Vibe From Cafe repository. The data may support chapter context and stats, but cafe browsing belongs to `cafein.id`.
+
+## Legacy Cafe URL Mapping
+Explicit old `/cafes/:slug` → cafein.id `/cafe/:slug` destinations for the 56 archived cafes. Verified rows redirect; ambiguous/unmatched rows keep a read-only legacy fallback. Source: `app/data/cafe-url-mapping.json`.

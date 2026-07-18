@@ -26,9 +26,13 @@ Public routes:
 - `/join`
 - `/contact`
 
-Redirects:
+Redirects and cafe URL migration:
 
-- `/cafes` and `/cafes/*` redirect to `https://cafein.id`
+- `/cafes` redirects to `https://cafein.id`
+- Verified `/cafes/:slug` paths redirect to `https://cafein.id/cafe/<mapped-slug>` (temporary 302 until owner promotion)
+- Ambiguous / unmatched archived slugs keep a read-only legacy page on this site
+- Unknown `/cafes/:slug` values return 404
+- Public map: `/cafe-url-mapping.json` (see `docs/cafe-url-migration.md`)
 - `/chapter` redirects to `/chapters`
 - `/event` redirects to `/events`
 - `/join-community` and `/join-comunity` redirect to `/join`
