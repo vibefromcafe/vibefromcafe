@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NODE_VERSION="22.17.0"
+NODE_DIR="$HOME/.local/share/node-v${NODE_VERSION}"
+BIN_DIR="$HOME/.local/bin"
+
+export PATH="$BIN_DIR:$PATH"
+
+# This project has no persistent backing services. Repair command shims in case
+# the home-directory links were disturbed while the orb was paused.
+if [[ -x "$NODE_DIR/bin/node" ]]; then
+  mkdir -p "$BIN_DIR"
+  for command in node npm npx corepack; do
+    ln -sfn "$NODE_DIR/bin/$command" "$BIN_DIR/$command"
+  done
+  if [[ ! -x "$BIN_DIR/pnpm" ]]; then
+    "$NODE_DIR/bin/corepack" enable --install-directory "$BIN_DIR"
+  fi
+fi
+
+command -v node >/dev/null
+command -v pnpm >/dev/null
+echo "Orb ready; no local services require reconnection."

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NODE_VERSION="22.17.0"
+PNPM_VERSION="11.1.3"
+NODE_DIR="$HOME/.local/share/node-v${NODE_VERSION}"
+BIN_DIR="$HOME/.local/bin"
+
+export PATH="$BIN_DIR:$PATH"
+export CI=true
+
+echo "==> Installing Node.js ${NODE_VERSION}"
+if [[ ! -x "$NODE_DIR/bin/node" ]]; then
+  archive="node-v${NODE_VERSION}-linux-x64.tar.gz"
+  tmp_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmp_dir"' EXIT
+
+  curl --fail --location --silent --show-error \
+    "https://nodejs.org/dist/v${NODE_VERSION}/${archive}" \
+    --output "$tmp_dir/$archive"
+  curl --fail --location --silent --show-error \
+    "https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt" \
+    --output "$tmp_dir/SHASUMS256.txt"
+  (
+    cd "$tmp_dir"
+    grep "  ${archive}$" SHASUMS256.txt | sha256sum --check -
+  )
+
+  mkdir -p "$(dirname "$NODE_DIR")"
+  tar -xzf "$tmp_dir/$archive" -C "$(dirname "$NODE_DIR")"
+  mv "$(dirname "$NODE_DIR")/node-v${NODE_VERSION}-linux-x64" "$NODE_DIR"
+fi
+
+mkdir -p "$BIN_DIR"
+for command in node npm npx corepack; do
+  ln -sfn "$NODE_DIR/bin/$command" "$BIN_DIR/$command"
+done
+hash -r
+
+echo "==> Enabling pnpm ${PNPM_VERSION}"
+corepack enable --install-directory "$BIN_DIR"
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+hash -r
+
+echo "==> Installing project dependencies"
+pnpm install --frozen-lockfile
+
+echo "==> Orb setup complete"
+node --version
+pnpm --version
