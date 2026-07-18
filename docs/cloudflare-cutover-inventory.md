@@ -54,7 +54,7 @@ with named primary and backup owners in the private operator register.
 | `WHATSAPP_INVITE_MESSAGE_TEMPLATE` | variable | Environment-specific | `<CONTENT_OWNER>` | Must say Vibe From Cafe / VFC after #2; no private group URL in the template. |
 | `CF_ACCESS_TEAM_DOMAIN` | variable | Production and Preview | `<SECURITY_OWNER>` | Introduced by PR #15; exact issuer must match the environment. |
 | `CF_ACCESS_AUDIENCE` | protected variable | Production and Preview separately | `<SECURITY_OWNER>` | Introduced by PR #15; retain only an alias in evidence. |
-| `ADMIN_MUTATIONS_ENABLED` | variable | Production only after approval; false/unset in Preview | `<CUTOVER_COMMANDER>` | Introduced by PR #15; freeze switch for write routing. |
+| `ADMIN_MUTATIONS_ENABLED` | variable | Production remains false/unset through rehearsal and freeze; staging may be enabled only for the controlled Phase 2 window | `<CUTOVER_COMMANDER>` | Introduced by PR #15; staging must be disabled and redeployed after synthetic cleanup; Production requires a later signed cutover gate. |
 | `ADMIN_BREAK_GLASS_ENABLED` | variable | false/unset normally | `<SECURITY_OWNER>` | Break-glass is not routine production authentication. |
 | `ADMIN_SECRET` | encrypted secret | unset for normal Production/Preview operation | `<SECURITY_OWNER>` | Existing implementation is unsafe until PR #15; no browser persistence. |
 | Cloudflare/Git deploy credentials | encrypted secret(s), names unknown | CI/operator scope | `<DEPLOY_OWNER>` | Least privilege, rotation, and storage remain manual-unverified. |

@@ -17,12 +17,16 @@ block starts in strict mode; any nonzero command or pipeline result is an abort.
 
 ```bash
 set -Eeuo pipefail
-export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-<change-ticket>"
+export CHANGE_TICKET="<approved-change-ticket>"
+export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$CHANGE_TICKET"
 export EVIDENCE_ROOT="/secure/vfc-cutover/$RUN_ID"
 export STAGING_BASE_URL="https://<staging-host>"
 export APEX_BASE_URL="https://vibefromcafe.id"
 export STAGING_PAGES_PROJECT="<staging-project-alias-resolved-privately>"
-export STAGING_WRANGLER_CONFIG="/secure/config/staging-pages.toml"
+export STAGING_PAGES_CONFIG="/secure/config/staging-pages.toml"
+export SOURCE_KV_CONFIG="/secure/config/source-kv.toml"
+export STAGING_KV_CONFIG="/secure/config/staging-kv.toml"
+export RUN_MANIFEST="/secure/vfc-cutover/manifests/<signed-run-manifest>.env"
 export WRANGLER_VERSION="<approved-version>"
 export PRODUCTION_HOSTS="vibefromcafe.id <other-supported-hosts>"
 export WWW_POLICY="<supported-or-intentional-nxdomain>"
@@ -46,6 +50,32 @@ expected outcome, actual pass/fail, evidence path/hash, and abort decision. The
 rollback; `<DATA_OWNER>`, `<SECURITY_OWNER>`, `<DNS_OPERATOR>`,
 `<DEPLOY_OPERATOR>`, `<MONITORING_OWNER>`, and `<COMMS_OWNER>` must be named with
 backups in the private operator register.
+
+### Signed evidence retention
+
+- **Redacted cutover evidence:** `<OPERATIONS_OWNER>` stores signed inventories,
+  config/report hashes, status matrices, approvals, timelines, alert-delivery
+  proof, and postmortems in the encrypted restricted evidence store for **12
+  months after the run or incident closes**, then deletes them under the signed
+  lifecycle policy. These artifacts must contain no raw records, response bodies,
+  credentials, private identities, or private links.
+- **Raw PII-bearing exports:** follow issue #12 / PR #19 exactly. Retain rolling
+  six-hour encrypted exports for **35 days** and one designated month-end export
+  for **12 months**. A rehearsal/final cutover export is retained for 35 days
+  unless it is the designated month-end copy; never extend it by copying it into
+  redacted evidence storage.
+- **Storage and keys:** `<OPERATIONS_OWNER>` owns the encrypted object store and
+  lifecycle jobs; `<SECURITY_OWNER>` owns the customer-managed encryption key,
+  least-privilege grants, and **quarterly** access/key review. Raw export access
+  is MFA/SSO protected, logged, and break-glass only.
+- **Deletion authority:** scheduled lifecycle deletion requires the signed policy;
+  early/manual deletion requires `<DATA_OWNER>` approval plus
+  `<SECURITY_OWNER>` execution and retained deletion evidence. Neither operator
+  may silently delete or extend retention alone.
+- **Hold override:** a documented legal or incident hold suspends deletion without
+  changing artifact contents. `<LEGAL_HOLD_OWNER>` or `<INCIDENT_COMMANDER>`
+  records scope, reason, start, reviewer, and review date; only that authority
+  may release the hold. Lifecycle deletion resumes after signed release.
 
 ## Phase 0 — preconditions, approvals, and freeze plan
 
@@ -98,6 +128,41 @@ test -z "$(git status --porcelain)" || {
 }
 ```
 
+Before **any** deploy, remote probe, KV read, or dashboard mutation, copy every
+`<...>` placeholder from this runbook into `RUN_MANIFEST` and replace it with an
+approved value or explicit `not-applicable` decision. The manifest contains
+named primary/backup operators, supported hosts, project/config aliases, owner
+decisions, evidence/retention locations, and go/no-go signatures; it is mode
+`0600`, stored privately, and signed by `<CUTOVER_COMMANDER>` and
+`<SECOND_OPERATOR>`. This fail-fast gate prints variable names only:
+
+```bash
+set -Eeuo pipefail
+required_vars=(
+  CHANGE_TICKET RUN_ID EVIDENCE_ROOT STAGING_BASE_URL APEX_BASE_URL
+  STAGING_PAGES_PROJECT STAGING_PAGES_CONFIG SOURCE_KV_CONFIG
+  STAGING_KV_CONFIG RUN_MANIFEST WRANGLER_VERSION PRODUCTION_HOSTS WWW_POLICY
+)
+for name in "${required_vars[@]}"; do
+  value="${!name-}"
+  if [[ -z "$value" || "$value" =~ \<[^\>]+\> ]]; then
+    printf 'ABORT: unresolved required input %s\n' "$name" >&2
+    exit 1
+  fi
+done
+test -r "$RUN_MANIFEST"
+test "$(python3 -c 'import os, sys; print(oct(os.stat(sys.argv[1]).st_mode & 0o777)[2:])' \
+  "$RUN_MANIFEST")" = 600
+if grep -Eq '<[^>]+>' "$RUN_MANIFEST"; then
+  echo 'ABORT: unresolved placeholder in signed run manifest' >&2
+  exit 1
+fi
+printf 'placeholder preflight: passed\n' \
+  | tee "$EVIDENCE_ROOT/placeholder-preflight.txt"
+```
+
+No later phase may start without this retained pass record and both signatures.
+
 ## Phase 1 — isolated staging deploy
 
 **Operator:** `<DEPLOY_OPERATOR>`; binding verification witnessed by
@@ -116,21 +181,31 @@ Before deploying, verify in **Workers & Pages > staging project > Settings**:
 - break-glass is false/unset and the shared admin secret is unset;
 - no custom production domain is attached.
 
-Create a restricted private `STAGING_WRANGLER_CONFIG` that names only the
-approved staging project and its staging-only binding. Do not edit or reuse the
-checked-in replacement config: it contains a different repository binding
-contract and is not deployed-state evidence. Record the pinned Wrangler version
-and private config SHA-256 (never its contents or namespace identity), then deploy
-the built candidate only to the named staging project:
+`STAGING_PAGES_CONFIG` is the private Wrangler configuration used only for Pages
+deployment. It names the approved staging Pages project and declares its runtime
+staging-only binding. `STAGING_KV_CONFIG` is a separate private Wrangler
+configuration used only by PR #18 capture/migration commands; `SOURCE_KV_CONFIG`
+is its read-only source counterpart. The Pages and staging-KV configs must resolve
+internally to the **same** dashboard-attested staging namespace, while the source
+config must resolve to a different namespace. They are not interchangeable.
+
+Before deployment, `<DATA_OWNER>` and `<SECOND_OPERATOR>` compare all three with
+**Workers & Pages > staging > Settings > Bindings** and the private KV inventory,
+sign the alias relationship in `RUN_MANIFEST`, and record sanitized SHA-256 hashes
+for each config. Never record their contents or namespace identities. Do not edit
+or reuse the checked-in replacement config: it is not deployed-state evidence.
+Then deploy the built candidate only to the named staging project:
 
 ```bash
 set -Eeuo pipefail
-test -r "$STAGING_WRANGLER_CONFIG"
-shasum -a 256 "$STAGING_WRANGLER_CONFIG" \
-  | sed "s#${STAGING_WRANGLER_CONFIG}#<private-staging-config>#" \
-  | tee "$EVIDENCE_ROOT/staging-config-sha256.txt"
+for config in "$STAGING_PAGES_CONFIG" "$SOURCE_KV_CONFIG" "$STAGING_KV_CONFIG"; do
+  test -r "$config"
+done
+shasum -a 256 "$STAGING_PAGES_CONFIG" "$SOURCE_KV_CONFIG" "$STAGING_KV_CONFIG" \
+  | sed -E 's#[[:space:]]+/secure/config/[^[:space:]]+#[private-config]#' \
+  | tee "$EVIDENCE_ROOT/private-config-sha256.txt"
 pnpm dlx "wrangler@$WRANGLER_VERSION" pages deploy build/client \
-  --config "$STAGING_WRANGLER_CONFIG" \
+  --config "$STAGING_PAGES_CONFIG" \
   --project-name "$STAGING_PAGES_PROJECT" --branch staging
 ```
 
@@ -155,15 +230,15 @@ captures and permits writes only to an attested empty non-production namespace:
 ```bash
 set -Eeuo pipefail
 pnpm kv:cutover capture --alias source \
-  --config /secure/config/source.toml \
+  --config "$SOURCE_KV_CONFIG" \
   --output .kv-cutover/rehearsal-source.json --execute-read
 pnpm kv:cutover capture --alias staging \
-  --config /secure/config/staging.toml \
+  --config "$STAGING_KV_CONFIG" \
   --output .kv-cutover/staging-before.json --execute-read
 # First run migrate without --execute; then use the exact staging-only command
 # and typed confirmation documented by PR #18 after dual authorization.
 pnpm kv:cutover capture --alias staging \
-  --config /secure/config/staging.toml \
+  --config "$STAGING_KV_CONFIG" \
   --output .kv-cutover/staging-after.json --execute-read
 pnpm kv:cutover reconcile \
   --source .kv-cutover/rehearsal-source.json \
@@ -172,9 +247,37 @@ pnpm kv:cutover reconcile \
 ```
 
 Privately sample every reported status, event override, both tombstone spellings,
-expiration, and metadata. Exercise one synthetic join, inquiry, and event
-create/update/delete; verify request IDs, safe logs, alerts, and actor audit; then
-remove synthetic data and reconcile again. Never screenshot records.
+expiration, and metadata. Then open one tightly controlled staging application
+mutation window; PR #18's direct KV rehearsal does not enable application writes:
+
+1. `<SECURITY_OWNER>` and `<SECOND_OPERATOR>` verify in **Workers & Pages >
+   replacement/staging > Settings > Variables and Secrets** that Production
+   `ADMIN_MUTATIONS_ENABLED` is false/unset and remains untouched. Record only
+   environment, variable name, state, timestamp, and signatures.
+2. In **Workers & Pages > staging > Settings > Variables and Secrets**, set
+   staging `ADMIN_MUTATIONS_ENABLED=true`. Do not change Production. Redeploy the
+   exact candidate with the Phase 1 `STAGING_PAGES_CONFIG` command.
+3. Verify the new staging deployment commit, all three private config hashes,
+   effective `staging` binding, staging Access application, Production-disabled
+   attestation, and authorized staging mutation readiness. Anonymous/forged
+   requests must still fail. Any mismatch triggers step 6 immediately and aborts.
+4. Exercise one reserved synthetic join, inquiry, and event create/update/delete;
+   verify request IDs, PII-safe logs, alert delivery, actor audit, and that writes
+   appear only in `staging`. Remove all synthetic records through the approved
+   application path and reconcile the cleaned namespace again. Never screenshot
+   records.
+5. Set staging `ADMIN_MUTATIONS_ENABLED` back to false/unset and redeploy the same
+   candidate/config. Verify authenticated staging mutation requests now return
+   `403`, reads remain isolated, synthetic cleanup reconciles, and Production is
+   still false/unset. Retain deployment aliases, timestamps, status-only matrix,
+   config/report hashes, and dual signatures.
+6. **Failure cleanup:** on any failure after enabling staging, stop tests, set the
+   staging variable false/unset, redeploy, verify `403`, and retain failure and
+   cleanup evidence before leaving the incident. If disable/redeploy/verification
+   cannot complete, page `<SECURITY_OWNER>` and keep the rehearsal blocked.
+
+Phase 3 cannot begin until staging is disabled again, the disable redeployment is
+verified, and Production-disabled evidence is signed.
 
 ## Phase 3 — route, security, form, accessibility, and SEO staging matrix
 
@@ -450,7 +553,7 @@ before resuming writers.
    then rebind every deployment/writer to one namespace in one controlled change.
 5. Make one authorized synthetic write, prove it exists only in the selected
    namespace, clean it up, and then resume service. Keep the other namespace
-   read-only through the approved retention period.
+   read-only under the raw-export retention and deletion policy above.
 
 Bulk put is not rollback: it does not remove destination-only keys. This runbook
 does not implement production copy or reverse migration.
