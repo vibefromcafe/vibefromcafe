@@ -9,6 +9,10 @@ vite.config.js
 vite.config.d.ts
 .DS_Store
 
+# KV cutover exports contain private community records. Never commit them.
+.kv-cutover/
+kv-cutover-exports/
+
 # Local visual QA captures
 vfc-*.png
 vcfc-*.png
