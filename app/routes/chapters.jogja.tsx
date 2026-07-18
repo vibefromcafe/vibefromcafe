@@ -16,20 +16,38 @@ export default function ChapterJogjaPage() {
     .slice(0, 6);
 
   return (
-    <PageFrame eyebrow="/ JOGJA CHAPTER" title="Vibe Coding Jogja." intro="The first active chapter: builders learning AI together from real cafe workspaces in Yogyakarta.">
+    <PageFrame
+      eyebrow="/ JOGJA CHAPTER"
+      title="VFC Jogja."
+      intro="The first local chapter page: people learning and building together from cafe workspaces in Yogyakarta. Join the community to get involved."
+    >
       <div className="grid gap-5 md:grid-cols-3">
-        <div className="dark-card"><Coffee className="text-yellow" /><p className="mt-8 text-4xl font-bold">{jogjaCafes.length}</p><p className="mt-2 text-white/45">Deprecated cafe data points retained for chapter context.</p></div>
-        <div className="dark-card"><Wifi className="text-yellow" /><p className="mt-8 text-4xl font-bold">{topCafes[0]?.wifi_speed ?? "N/A"}</p><p className="mt-2 text-white/45">Top recorded WiFi speed from the archived cafe dataset.</p></div>
-        <div className="dark-card"><Zap className="text-yellow" /><p className="mt-8 text-4xl font-bold">Active</p><p className="mt-2 text-white/45">Hands-on chapter for AI learning and build sessions.</p></div>
+        <div className="dark-card">
+          <Coffee className="text-yellow" />
+          <p className="mt-8 text-4xl font-bold">{jogjaCafes.length}</p>
+          <p className="mt-2 text-white/45">Local cafe notes kept for Jogja chapter context.</p>
+        </div>
+        <div className="dark-card">
+          <Wifi className="text-yellow" />
+          <p className="mt-8 text-4xl font-bold">{topCafes[0]?.wifi_speed ?? "N/A"}</p>
+          <p className="mt-2 text-white/45">Highest Wi‑Fi figure recorded in those local notes.</p>
+        </div>
+        <div className="dark-card">
+          <Zap className="text-yellow" />
+          <p className="mt-8 text-4xl font-bold">Open</p>
+          <p className="mt-2 text-white/45">Public chapter page with a community join path.</p>
+        </div>
       </div>
 
       <section className="mt-10">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-yellow">Deprecated cafe data</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-yellow">Local cafe notes</p>
             <h2 className="mt-3 text-3xl font-bold">Top Jogja cafe context</h2>
           </div>
-          <a className="button button-ghost" href="https://cafein.id" target="_blank" rel="noreferrer">Browse cafes on cafein.id <ArrowRight size={16} /></a>
+          <a className="button button-ghost" href="https://cafein.id" target="_blank" rel="noreferrer">
+            Browse cafes on cafein.id <ArrowRight size={16} />
+          </a>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {topCafes.map((cafe) => (

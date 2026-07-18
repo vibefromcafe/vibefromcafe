@@ -68,7 +68,7 @@ export default function ContactPage() {
         </div>
         <aside className="space-y-4">
           <div className="dark-card"><BrainCircuit className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">Discovery first</h2><p className="mt-3 leading-7 text-white/50">We start from the business problem, not the AI trend.</p></div>
-          <div className="dark-card"><Workflow className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">Built for production</h2><ul className="mt-5 space-y-3 text-white/50">{["Workflow fit", "Human handoff", "Measurable operations"].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" />{item}</li>)}</ul></div>
+          <div className="dark-card"><Workflow className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">Built for real workflows</h2><ul className="mt-5 space-y-3 text-white/50">{["Workflow fit", "Human handoff", "Measurable operations"].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" />{item}</li>)}</ul></div>
         </aside>
       </div>
     </PageFrame>
