@@ -1,4 +1,5 @@
 import type { Submission, SubmissionStatus } from "../../app/data/types";
+import { logSafe, requestIdFor, withRequestId } from "./observability";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -28,18 +29,23 @@ function resolveInviteConfig(env: Env) {
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
+  const requestId = requestIdFor(request);
 
-  let body: SubmissionBody;
+  let parsedBody: unknown;
   try {
-    body = (await request.json()) as SubmissionBody;
+    parsedBody = await request.json();
   } catch {
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return withRequestId(Response.json({ error: "Invalid JSON" }, { status: 400 }), requestId);
   }
+  if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
+    return withRequestId(Response.json({ error: "Invalid JSON" }, { status: 400 }), requestId);
+  }
+  const body = parsedBody as SubmissionBody;
 
   const { name, city, role, whatsapp, referralSource, referralName } = body;
 
   if (!name?.trim() || !city?.trim() || !role?.trim() || !whatsapp?.trim() || !referralSource?.trim()) {
-    return Response.json({ error: "All required fields must be filled" }, { status: 400 });
+    return withRequestId(Response.json({ error: "All required fields must be filled" }, { status: 400 }), requestId);
   }
 
   const id = crypto.randomUUID();
@@ -61,11 +67,28 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     createdAt: now,
   };
 
-  await env.VFC_SUBMISSIONS.put(`submission:${id}`, JSON.stringify(submission));
+  try {
+    await env.VFC_SUBMISSIONS.put(`submission:${id}`, JSON.stringify(submission));
+  } catch {
+    logSafe({
+      event: "submission_write_failed",
+      level: "error",
+      requestId,
+      method: "POST",
+      route: "/api/join",
+      status: 503,
+      errorType: "kv_write",
+    });
+    return withRequestId(
+      Response.json({ error: "Submission could not be saved", requestId }, { status: 503 }),
+      requestId,
+    );
+  }
 
-  return Response.json({
+  logSafe({ event: "submission_write_succeeded", level: "info", requestId, method: "POST", route: "/api/join", status: 200 });
+  return withRequestId(Response.json({
     success: true,
     submission: { id, invitationStatus: submission.invitationStatus },
     whatsappInvite,
-  });
+  }), requestId);
 };

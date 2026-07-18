@@ -2,6 +2,7 @@ import { parseEventInput } from "../../../../app/data/event-validation";
 import { getEventById, removeEvent, saveEvent } from "../../../../app/data/events-store";
 import type { Event } from "../../../../app/data/types";
 import type { AdminAuthData } from "../auth";
+import { logSafe, writeAuditRecord, type AuditedEventField } from "../../observability";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -11,6 +12,10 @@ function getId(params: Record<string, string | string[] | undefined>) {
   const paramId = params.id;
   return typeof paramId === "string" ? paramId.trim() : "";
 }
+
+const AUDITABLE_EVENT_FIELDS: AuditedEventField[] = [
+  "title", "description", "date", "time", "location", "cafeId", "imageUrl", "mapUrl", "status", "tags",
+];
 
 export const onRequestGet: PagesFunction<Env, "id"> = async ({ env, params }) => {
   const id = getId(params);
@@ -28,7 +33,8 @@ export const onRequestGet: PagesFunction<Env, "id"> = async ({ env, params }) =>
 
 export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
   const actor = data.adminActor;
-  if (!actor) {
+  const requestId = data.requestId;
+  if (!actor || !requestId) {
     return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   }
 
@@ -70,12 +76,32 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
 
   await saveEvent(env, updated, actor);
 
+  const fields = AUDITABLE_EVENT_FIELDS.filter(
+    (field) => JSON.stringify(existing[field]) !== JSON.stringify(updated[field]),
+  );
+  await writeAuditRecord(env.VFC_SUBMISSIONS, {
+    timestamp: new Date().toISOString(),
+    actor,
+    action: "event.update",
+    recordType: "event",
+    recordId: id,
+    requestId,
+    changes: {
+      fields,
+      ...(existing.status !== updated.status
+        ? { oldStatus: existing.status, newStatus: updated.status }
+        : {}),
+    },
+  });
+  logSafe({ event: "admin_mutation_succeeded", level: "info", requestId, actor, action: "event.update", recordType: "event", recordId: id, status: 200 });
+
   return Response.json({ event: updated });
 };
 
 export const onRequestDelete: PagesFunction<Env, "id", AdminAuthData> = async ({ env, params, data }) => {
   const actor = data.adminActor;
-  if (!actor) {
+  const requestId = data.requestId;
+  if (!actor || !requestId) {
     return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   }
 
@@ -88,6 +114,17 @@ export const onRequestDelete: PagesFunction<Env, "id", AdminAuthData> = async ({
   if (!removed) {
     return Response.json({ error: "Event not found" }, { status: 404 });
   }
+
+  await writeAuditRecord(env.VFC_SUBMISSIONS, {
+    timestamp: new Date().toISOString(),
+    actor,
+    action: "event.delete",
+    recordType: "event",
+    recordId: id,
+    requestId,
+    changes: { oldStatus: "present", newStatus: "deleted" },
+  });
+  logSafe({ event: "admin_mutation_succeeded", level: "info", requestId, actor, action: "event.delete", recordType: "event", recordId: id, status: 200 });
 
   return Response.json({ success: true });
 };

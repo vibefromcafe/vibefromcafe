@@ -1,5 +1,6 @@
 import type { Submission, SubmissionStatus } from "../../../../app/data/types";
 import type { AdminAuthData } from "../auth";
+import { logSafe, writeAuditRecord } from "../../observability";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -56,7 +57,8 @@ function normalizeSubmission(submission: StoredSubmission): Submission {
 
 export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
   const actor = data.adminActor;
-  if (!actor) {
+  const requestId = data.requestId;
+  if (!actor || !requestId) {
     return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   }
 
@@ -66,12 +68,16 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
     return Response.json({ error: "Submission id is required" }, { status: 400 });
   }
 
-  let body: PatchBody;
+  let parsedBody: unknown;
   try {
-    body = (await request.json()) as PatchBody;
+    parsedBody = await request.json();
   } catch {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const body = parsedBody as PatchBody;
 
   const targetStatus = parseSubmissionStatus(body.invitationStatus);
   if (!targetStatus) {
@@ -109,6 +115,26 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
   }
 
   await env.VFC_SUBMISSIONS.put(key, JSON.stringify(updated));
+
+  await writeAuditRecord(env.VFC_SUBMISSIONS, {
+    timestamp: now,
+    actor,
+    action: "submission.status_update",
+    recordType: "submission",
+    recordId: id,
+    requestId,
+    changes: { oldStatus: currentStatus, newStatus: targetStatus },
+  });
+  logSafe({
+    event: "admin_mutation_succeeded",
+    level: "info",
+    requestId,
+    actor,
+    action: "submission.status_update",
+    recordType: "submission",
+    recordId: id,
+    status: 200,
+  });
 
   return Response.json({ success: true, submission: updated });
 };
