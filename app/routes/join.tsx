@@ -88,13 +88,13 @@ export default function JoinPage() {
               {whatsappInvite?.groupInviteUrl ? (
                 <>
                   <h2 className="text-3xl font-bold text-yellow">You're invited!</h2>
-                  <p className="mx-auto max-w-xl leading-7 text-white/55">We received your details. Join the WhatsApp group now to continue onboarding with the VCFC community.</p>
+                  <p className="mx-auto max-w-xl leading-7 text-white/55">We received your details. Join the WhatsApp group now to continue onboarding with the VFC community.</p>
                   <a className="button bg-yellow text-midnight" href={whatsappInvite.groupInviteUrl} target="_blank" rel="noreferrer">Join WhatsApp group <ArrowRight size={16} /></a>
                 </>
               ) : (
                 <>
                   <h2 className="text-3xl font-bold text-yellow">Thanks, your submission is in.</h2>
-                  <p className="leading-7 text-white/55">We received your details. Tim VCFC bakal share the WhatsApp invite soon.</p>
+                  <p className="leading-7 text-white/55">We received your details. Tim VFC bakal share the WhatsApp invite soon.</p>
                 </>
               )}
             </div>

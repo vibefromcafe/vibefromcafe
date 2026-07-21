@@ -101,7 +101,7 @@ const services = [
 
 const products = [
   {
-    code: 'VCFC / 001',
+    code: 'VFC / 001',
     name: 'KopiChat',
     category: 'AI CUSTOMER SERVICE',
     copy: 'AI support agent untuk WhatsApp dan website yang menjawab dari knowledge base, lalu meneruskan percakapan kompleks ke tim manusia.',
@@ -110,7 +110,7 @@ const products = [
     preview: 'chat',
   },
   {
-    code: 'VCFC / 002',
+    code: 'VFC / 002',
     name: 'FlowPilot',
     category: 'WORKFLOW AUTOMATION',
     copy: 'Automation layer untuk memproses lead, dokumen, approval, dan update lintas tools tanpa copy-paste berulang.',
@@ -119,7 +119,7 @@ const products = [
     preview: 'flow',
   },
   {
-    code: 'VCFC / 003',
+    code: 'VFC / 003',
     name: 'Insight Desk',
     category: 'KNOWLEDGE COPILOT',
     copy: 'Workspace pencarian internal yang memberi jawaban dari SOP, laporan, dan dokumen perusahaan lengkap dengan sumbernya.',
@@ -131,9 +131,9 @@ const products = [
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <Link className="brand-mark" to="/" aria-label="Vibe Coding From Cafe home">
+    <Link className="brand-mark" to="/" aria-label="Vibe From Cafe home">
       <span className="brand-icon"><Coffee size={compact ? 18 : 22} strokeWidth={2.6} /></span>
-      <span className={compact ? 'hidden sm:inline' : ''}>Vibe Coding From Cafe</span>
+      <span className={compact ? 'hidden sm:inline' : ''}>Vibe From Cafe</span>
     </Link>
   )
 }
@@ -180,12 +180,12 @@ export default function Home() {
 
         <div className="page-shell relative z-10 grid items-center gap-16 pb-24 pt-20 lg:grid-cols-[1.1fr_.9fr] lg:pb-28 lg:pt-24">
           <div>
-            <div className="eyebrow mb-7"><span className="status-dot" /> Community-powered AI studio</div>
+            <div className="eyebrow mb-7"><span className="status-dot" /> AI community and studio</div>
             <h1 className="hero-title max-w-[780px]">
               Learn AI together. Build AI that <span className="highlight-chip">works.</span>
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-8 text-white/65 md:text-xl">
-              Vibe Coding From Cafe adalah komunitas pengguna AI sekaligus AI studio—tempat praktisi belajar bersama dan membantu bisnis membangun solusi yang benar-benar dipakai.
+              Vibe From Cafe adalah komunitas AI tempat orang berdiskusi, belajar, bikin sesi, dan tumbuh bersama. Studio kami menerapkan energi itu untuk membantu bisnis membangun solusi yang benar-benar dipakai.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link className="button button-primary" to="/contact">Build AI with us <ArrowRight size={18} /></Link>
@@ -202,7 +202,7 @@ export default function Home() {
             <div className="absolute -inset-12 rounded-full bg-yellow/15 blur-3xl" />
             <div className="event-card relative rotate-[1.5deg]">
               <div className="flex items-center justify-between border-b border-black/10 px-5 py-4 font-mono text-[11px] font-bold uppercase tracking-[.18em]">
-                <span>Live product / VCFC-001</span>
+                <span>Live product / VFC-001</span>
                 <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#f34b42]" /> Deployed</span>
               </div>
               <div className="p-6 sm:p-8">
@@ -441,7 +441,7 @@ export default function Home() {
                     <span className="size-2.5 rounded-full bg-[#ff645e]" />
                     <span className="size-2.5 rounded-full bg-yellow" />
                     <span className="size-2.5 rounded-full bg-[#72d49c]" />
-                    <span className="ml-3 font-mono text-[10px] text-white/35">vcfc-build-session</span>
+                    <span className="ml-3 font-mono text-[10px] text-white/35">vfc-build-session</span>
                   </div>
                   <div className="grid min-h-[380px] sm:grid-cols-[130px_1fr]">
                     <div className="hidden border-r border-white/10 p-4 font-mono text-[10px] leading-7 text-white/35 sm:block">BRIEF.md<br />ideas/<br />prototype/<br /><span className="text-yellow">launch.tsx</span></div>
@@ -505,7 +505,7 @@ export default function Home() {
         <div className="page-shell">
           <div className="grid gap-12 md:grid-cols-[1.2fr_.8fr_.9fr]">
             <div>
-              <Link className="text-2xl font-bold text-yellow" to="/">Vibe Coding From Cafe</Link>
+              <Link className="text-2xl font-bold text-yellow" to="/">Vibe From Cafe</Link>
               <p className="mt-7 max-w-md text-lg leading-8 text-white/50">A support system for tech workers navigating the AI shift -- sambil ngopi bareng.</p>
             </div>
             <div>
@@ -530,7 +530,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-16 border-t border-white/10 pt-10 text-center text-lg text-white/40">
-            Vibe Coding From Cafe -- Made with warmth from Indonesia.
+            Vibe From Cafe -- Made with warmth from Indonesia.
           </div>
         </div>
       </footer>

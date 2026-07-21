@@ -12,7 +12,7 @@ type StoredSubmission = Omit<Submission, "invitationStatus"> & {
 
 const SUBMISSION_PREFIX = "submission:";
 const DEFAULT_WHATSAPP_INVITE_MESSAGE =
-  "Hi {{name}}, welcome to Vibe Coding From Cafe. Join our WhatsApp community here: {{group_link}}";
+  "Hi {{name}}, welcome to Vibe From Cafe. Join our WhatsApp community here: {{group_link}}";
 
 const STATUS_FLOW: Record<SubmissionStatus, SubmissionStatus[]> = {
   signed_up: ["signed_up", "invited"],

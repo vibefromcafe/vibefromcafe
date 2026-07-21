@@ -8,9 +8,9 @@ import {
 import type { LinksFunction, MetaFunction } from "react-router";
 import "./app.css";
 
-const SITE_TITLE = "Vibe Coding From Cafe - Community-Powered AI Studio";
+const SITE_TITLE = "Vibe From Cafe - AI Community and Studio";
 const SITE_DESCRIPTION =
-  "Vibe Coding From Cafe is a community-powered AI studio: learn AI together, or build AI assistants, automation, and custom products with us.";
+  "Vibe From Cafe is an AI community and studio where people learn, share, build, and grow together.";
 
 export const meta: MetaFunction = () => [
   { title: SITE_TITLE },

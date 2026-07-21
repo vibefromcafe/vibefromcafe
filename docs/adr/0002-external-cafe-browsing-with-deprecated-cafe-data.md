@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-The current VCFC UI treats cafe browsing as an external destination at `cafein.id`. Upstream chapter pages depend on cafe records for local context and stats.
+The current VFC UI treats cafe browsing as an external destination at `cafein.id`. Upstream chapter pages depend on cafe records for local context and stats.
 
 ## Decision
 Keep cafe browsing external to `https://cafein.id`, redirect app cafe routes there, and retain copied cafe JSON only as Deprecated Cafe Data for chapter detail support.

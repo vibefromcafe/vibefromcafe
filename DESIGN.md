@@ -1,6 +1,6 @@
-# Vibe Coding From Cafe — Design Direction
+# Vibe From Cafe — Design Direction
 
-Adapted from the Sentry analysis on getdesign.md and tuned for Vibe Coding From Cafe.
+Adapted from the Sentry analysis on getdesign.md and tuned for Vibe From Cafe.
 
 ## Character
 
@@ -53,4 +53,4 @@ Yellow replaces Sentry's lime and remains a scarce typographic device and signal
 
 - VibeDev ID: bold community-first headline, public proof, showcase rhythm.
 - Genesis Marketplace: cinematic dark hero, modular category cards, polished density.
-- Vibe Coding From Cafe: coffee culture, local chapters, learn/build/share voice.
+- Vibe From Cafe: coffee culture, local chapters, learn/build/share voice.

@@ -1,8 +1,8 @@
-# Vibe Coding From Cafe
+# Vibe From Cafe
 
-Public site and Cloudflare Pages app for Vibe Coding From Cafe.
+Public site and Cloudflare Pages app for Vibe From Cafe.
 
-This repository keeps the current VCFC visual design while using the same operational architecture as `zainfathoni/vibefromcafe`: React Router framework mode, Cloudflare Pages, Pages Functions, and Cloudflare KV-backed runtime data.
+This repository keeps the current VFC visual design while using the same operational architecture as `zainfathoni/vibefromcafe`: React Router framework mode, Cloudflare Pages, Pages Functions, and Cloudflare KV-backed runtime data.
 
 ## Repository status
 
@@ -78,7 +78,7 @@ Variables:
 
 ```toml
 [vars]
-WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding From Cafe. Yuk gabung ke grup komunitas kami di sini: {{group_link}}"
+WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe From Cafe. Yuk gabung ke grup komunitas kami di sini: {{group_link}}"
 ```
 
 Admin access is protected in deployed environments by Cloudflare Access.
