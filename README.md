@@ -71,9 +71,12 @@ Variables:
 ```toml
 [vars]
 WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding From Cafe. Yuk gabung ke grup komunitas kami di sini: {{group_link}}"
+VITE_TURNSTILE_SITE_KEY = "your-public-turnstile-site-key"
 ```
 
-Admin access is protected in deployed environments by Cloudflare Access.
+Configure `TURNSTILE_SECRET_KEY` as a secret environment variable in Cloudflare Pages when Turnstile should be enforced. If `TURNSTILE_SECRET_KEY` is missing, public forms continue to work without Turnstile verification so local and preview environments do not break.
+
+Admin access is protected in deployed environments by Cloudflare Access. `/admin/health` shows configured/missing status for public-form security settings without exposing secret values.
 
 ## Development
 
