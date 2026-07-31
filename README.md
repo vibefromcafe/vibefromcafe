@@ -130,4 +130,16 @@ Cloudflare Pages should use:
 - Functions directory: `functions`
 - KV binding: `VFC_SUBMISSIONS`
 
-Use a staging Pages project and staging KV namespace first. Replace the placeholder KV namespace id in `wrangler.toml` before deploying.
+Use a staging Pages project and staging KV namespace first. Do not treat the
+checked-in KV identity as proof of a deployed binding or reuse it for staging;
+verify each environment in Cloudflare and use a restricted private staging
+configuration as described by the cutover runbook.
+
+The production-readiness inventory and operator procedure are maintained in:
+
+- [`docs/cloudflare-cutover-inventory.md`](docs/cloudflare-cutover-inventory.md)
+- [`docs/cloudflare-cutover-runbook.md`](docs/cloudflare-cutover-runbook.md)
+
+These documents do not authorize a production cutover. Issue
+[#11](https://github.com/vibefromcafe/vibefromcafe/issues/11) remains blocked by
+its native prerequisites and retained operational evidence.
