@@ -4,6 +4,14 @@ Public site and Cloudflare Pages app for Vibe Coding From Cafe.
 
 This repository keeps the current VCFC visual design while using the same operational architecture as `zainfathoni/vibefromcafe`: React Router framework mode, Cloudflare Pages, Pages Functions, and Cloudflare KV-backed runtime data.
 
+## Repository status
+
+- [`vibefromcafe/vibefromcafe`](https://github.com/vibefromcafe/vibefromcafe) is the canonical repository. Its name remains `vibefromcafe`.
+- [`zainfathoni/vibefromcafe`](https://github.com/zainfathoni/vibefromcafe) is the legacy source until the production cutover is complete; it has not been transferred or archived.
+- [Organization issue #1](https://github.com/vibefromcafe/vibefromcafe/issues/1) and its native sub-issue/blocker relationships are the source of truth for migration and cutover readiness. Legacy issue #27 and the `.tickets/br-jv0*` transfer plan are superseded.
+
+Do not rename this repository to `web`, transfer or archive the legacy repository, or mutate production Cloudflare resources as part of ordinary repository work. Those actions require an explicit cutover decision recorded in the organization tracker.
+
 ## Stack
 
 - React 19
