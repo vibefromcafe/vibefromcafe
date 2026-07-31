@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Sparkles, Users } from "lucide-react";
 import { PageFrame } from "../components/SiteChrome";
+import { joinAsideHighlight } from "../data/public-claims";
 
 type InterestForm = {
   name: string;
@@ -114,7 +115,7 @@ export default function JoinPage() {
           )}
         </div>
         <aside className="space-y-4">
-          <div className="dark-card"><Users className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">400+ members</h2><p className="mt-3 leading-7 text-white/50">Designers, engineers, founders, marketers, researchers, and the curious.</p></div>
+          <div className="dark-card"><Users className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">{joinAsideHighlight.title}</h2><p className="mt-3 leading-7 text-white/50">{joinAsideHighlight.body}</p></div>
           <div className="dark-card"><Sparkles className="text-yellow" /><h2 className="mt-8 text-2xl font-bold">No gatekeeping</h2><p className="mt-3 leading-7 text-white/50">Datang dengan rasa ingin tahu. Tinggalkan ruangan dengan sesuatu yang lebih nyata.</p></div>
         </aside>
       </div>

@@ -51,9 +51,10 @@
   .button-outline-dark { @apply border border-midnight/40 text-midnight hover:bg-black/5; }
 
   .event-card { @apply overflow-hidden rounded-[18px] border-t-[6px] border-yellow bg-white text-midnight shadow-[0_30px_90px_rgba(0,0,0,.25)]; }
-  .chapter-card { @apply overflow-hidden rounded-xl border border-white/10 bg-deep transition-transform duration-300 hover:-translate-y-1; }
+  .chapter-card { @apply overflow-hidden rounded-xl border border-white/10 bg-deep; }
+  a .chapter-card { @apply transition-transform duration-300 hover:-translate-y-1; }
   .service-card { @apply border-b bg-white transition-colors hover:bg-[#f8f7fa] md:odd:border-r; }
-  .product-card { @apply overflow-hidden rounded-xl border border-white/10 bg-midnight transition-transform duration-300 hover:-translate-y-1; }
+  .product-card { @apply overflow-hidden rounded-xl border border-white/10 bg-midnight; }
   .product-preview { @apply m-3 min-h-[190px] overflow-hidden rounded-lg border border-white/10 bg-deep; }
   .ecosystem-card { @apply relative rounded-[18px] border border-black/10 p-7 md:p-9; }
   .ecosystem-connector { @apply absolute left-1/2 top-1/2 z-10 hidden size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-paper bg-yellow font-mono text-lg font-bold lg:grid; }

@@ -11,7 +11,6 @@ import {
   Code2,
   Cpu,
   Database,
-  ExternalLink,
   MapPin,
   Menu,
   MessageCircle,
@@ -21,14 +20,17 @@ import {
   X,
   Zap,
 } from 'lucide-react'
+import {
+  heroProofPoints,
+  publicChapters,
+  publicProductExamples,
+} from '../data/public-claims'
 
-const chapters = [
-  { name: 'Jogja', scope: 'Yogyakarta', detail: '258 members', tone: 'bg-[#f5c400]' },
-  { name: 'Surabaya-Malang', scope: 'East Java', detail: '40 members', tone: 'bg-[#79628c]' },
-  { name: 'Jabodetabek', scope: 'Greater Jakarta', detail: '88 members', tone: 'bg-[#7bb6ff]' },
-  { name: 'Kuala Lumpur Isp.', scope: 'Kuala Lumpur', detail: '18 members', tone: 'bg-[#f4a261]' },
-  { name: 'Bandung', scope: 'Bandung', detail: '9 members', tone: 'bg-[#ff8ca1]' },
-]
+const proofIcons = {
+  users: Users,
+  coffee: Coffee,
+  map: MapPin,
+} as const
 
 const principles = [
   {
@@ -93,39 +95,9 @@ const services = [
   {
     index: '/04',
     title: 'Custom AI Product',
-    copy: 'Dari prototype hingga production—kami merancang produk AI sesuai proses dan pengguna Anda.',
-    deliverables: ['Product design', 'Engineering', 'Deployment'],
+    copy: 'Dari prototype hingga produk yang dipakai sehari-hari—kami merancang solusi AI sesuai proses dan pengguna Anda.',
+    deliverables: ['Product design', 'Engineering', 'Handover'],
     icon: BrainCircuit,
-  },
-]
-
-const products = [
-  {
-    code: 'VCFC / 001',
-    name: 'KopiChat',
-    category: 'AI CUSTOMER SERVICE',
-    copy: 'AI support agent untuk WhatsApp dan website yang menjawab dari knowledge base, lalu meneruskan percakapan kompleks ke tim manusia.',
-    tags: ['24/7 support', 'Omnichannel', 'Human handoff'],
-    accent: 'bg-yellow',
-    preview: 'chat',
-  },
-  {
-    code: 'VCFC / 002',
-    name: 'FlowPilot',
-    category: 'WORKFLOW AUTOMATION',
-    copy: 'Automation layer untuk memproses lead, dokumen, approval, dan update lintas tools tanpa copy-paste berulang.',
-    tags: ['Lead routing', 'Document AI', 'Integrations'],
-    accent: 'bg-[#fa7faa]',
-    preview: 'flow',
-  },
-  {
-    code: 'VCFC / 003',
-    name: 'Insight Desk',
-    category: 'KNOWLEDGE COPILOT',
-    copy: 'Workspace pencarian internal yang memberi jawaban dari SOP, laporan, dan dokumen perusahaan lengkap dengan sumbernya.',
-    tags: ['RAG', 'Citations', 'Private data'],
-    accent: 'bg-[#79628c]',
-    preview: 'search',
   },
 ]
 
@@ -192,9 +164,14 @@ export default function Home() {
               <Link className="button button-ghost" to="/join"><Users size={17} /> Join the community</Link>
             </div>
             <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/50">
-              <span className="flex items-center gap-2"><Users size={17} className="text-yellow" /> 400+ community members</span>
-              <span className="flex items-center gap-2"><Coffee size={17} className="text-yellow" /> 4,000+ cafes indexed</span>
-              <span className="flex items-center gap-2"><MapPin size={17} className="text-yellow" /> 5 active groups</span>
+              {heroProofPoints.map((point) => {
+                const Icon = proofIcons[point.icon]
+                return (
+                  <span key={point.label} className="flex items-center gap-2">
+                    <Icon size={17} className="text-yellow" /> {point.label}
+                  </span>
+                )
+              })}
             </div>
           </div>
 
@@ -202,8 +179,8 @@ export default function Home() {
             <div className="absolute -inset-12 rounded-full bg-yellow/15 blur-3xl" />
             <div className="event-card relative rotate-[1.5deg]">
               <div className="flex items-center justify-between border-b border-black/10 px-5 py-4 font-mono text-[11px] font-bold uppercase tracking-[.18em]">
-                <span>Live product / VCFC-001</span>
-                <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#f34b42]" /> Deployed</span>
+                <span>Service example / 01</span>
+                <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#f5c400]" /> Concept</span>
               </div>
               <div className="p-6 sm:p-8">
                 <div className="mb-10 flex items-start justify-between gap-5">
@@ -211,7 +188,7 @@ export default function Home() {
                   <span className="rounded-full border border-black/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest">AI customer service</span>
                 </div>
                 <p className="font-mono text-xs font-bold uppercase tracking-[.15em] text-black/55">KopiChat</p>
-                <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">Customer questions, answered in seconds.</h2>
+                <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">Customer questions, answered with context.</h2>
                 <div className="mt-8 grid gap-3 border-t border-black/10 pt-5 text-sm sm:grid-cols-2">
                   <span className="flex items-center gap-2"><Bot size={16} /> WhatsApp + Web</span>
                   <span className="flex items-center gap-2"><Check size={16} /> Human handoff</span>
@@ -219,7 +196,7 @@ export default function Home() {
               </div>
             </div>
             <div className="absolute -bottom-8 -left-5 -rotate-6 rounded-lg border-2 border-midnight bg-white px-4 py-3 font-mono text-xs font-bold text-midnight shadow-[6px_6px_0_#17131f] sm:-left-10">
-              repetitive work,<br />now automated ↗
+              example pattern,<br />built around your workflow
             </div>
           </div>
         </div>
@@ -267,7 +244,7 @@ export default function Home() {
               </div>
               <h3 className="mt-12 max-w-md text-3xl font-semibold leading-tight">Menerapkan kemampuan komunitas untuk menyelesaikan masalah bisnis nyata.</h3>
               <ul className="mt-8 space-y-4 text-sm text-white/60">
-                {['Discovery dari masalah, bukan tren', 'Design dan engineering end-to-end', 'Dibangun untuk digunakan di production'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" strokeWidth={3} /> {item}</li>)}
+                {['Discovery dari masalah, bukan tren', 'Design dan engineering end-to-end', 'Dirancang untuk dipakai di alur kerja nyata'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" strokeWidth={3} /> {item}</li>)}
               </ul>
               <Link className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-white underline underline-offset-4" to="/contact">Diskusikan project AI <ArrowRight size={16} /></Link>
             </article>
@@ -288,7 +265,7 @@ export default function Home() {
             </div>
             <div>
               <h2 className="section-title max-w-4xl">Dari masalah operasional menjadi produk AI yang <span className="underline-sketch">benar-benar dipakai.</span></h2>
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-ink-muted">Bukan sekadar demo. Kami membantu menemukan use case, merancang pengalaman, membangun sistem, dan membawanya sampai production.</p>
+              <p className="mt-7 max-w-2xl text-lg leading-8 text-ink-muted">Bukan sekadar slide deck. Kami membantu menemukan use case, merancang pengalaman, membangun sistem, dan menyesuaikannya dengan cara kerja tim Anda.</p>
             </div>
           </div>
 
@@ -315,23 +292,23 @@ export default function Home() {
         <div className="page-shell relative z-10">
           <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
-              <p className="section-label text-yellow">/ PRODUCT SHOWCASE</p>
-              <h2 className="section-title mt-5 max-w-3xl">Produk yang bekerja. Bukan cuma pitch deck.</h2>
+              <p className="section-label text-yellow">/ SERVICE EXAMPLES</p>
+              <h2 className="section-title mt-5 max-w-3xl">Pola solusi, bukan klaim produk live.</h2>
             </div>
-            <p className="max-w-sm leading-7 text-white/60">Lahir dari pola yang kami pelajari di komunitas, lalu dikustomisasi untuk data, workflow, dan cara kerja bisnis Anda.</p>
+            <p className="max-w-sm leading-7 text-white/60">Contoh pendekatan yang kami sesuaikan dengan data, workflow, dan cara kerja bisnis Anda—bukan katalog produk yang sudah di-deploy.</p>
           </div>
 
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
-            {products.map((product) => (
-              <article key={product.code} className="product-card group">
+            {publicProductExamples.map((product) => (
+              <article key={product.code} className="product-card">
                 <div className="product-preview">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-white/45">
-                    <span>{product.code}</span><span className="flex items-center gap-1.5"><span className={`size-1.5 rounded-full ${product.accent}`} /> ready to customize</span>
+                    <span>{product.code}</span><span className="flex items-center gap-1.5"><span className={`size-1.5 rounded-full ${product.accent}`} /> {product.statusLabel}</span>
                   </div>
                   {product.preview === 'chat' ? (
                     <div className="space-y-3 p-5 text-xs">
                       <div className="mr-8 rounded-lg rounded-tl-sm bg-white/8 p-3 text-white/65">Apakah pesanan saya sudah dikirim?</div>
-                      <div className="ml-8 rounded-lg rounded-tr-sm bg-yellow p-3 text-midnight">Sudah. Paket Anda tiba besok sebelum 17.00. <span className="font-bold underline">Lacak paket →</span></div>
+                      <div className="ml-8 rounded-lg rounded-tr-sm bg-yellow p-3 text-midnight">Sudah. Estimasi tiba besok sebelum sore, berdasarkan data pesanan.</div>
                       <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-widest text-white/35"><span className="size-1.5 animate-pulse rounded-full bg-yellow" /> answered from order data</div>
                     </div>
                   ) : null}
@@ -351,7 +328,7 @@ export default function Home() {
                 </div>
                 <div className="p-6 md:p-7">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[.18em] text-white/40">{product.category}</p>
-                  <div className="mt-3 flex items-center justify-between"><h3 className="text-3xl font-semibold">{product.name}</h3><ExternalLink size={19} className="text-white/40 transition-colors group-hover:text-yellow" /></div>
+                  <h3 className="mt-3 text-3xl font-semibold">{product.name}</h3>
                   <p className="mt-4 leading-7 text-white/55">{product.copy}</p>
                   <div className="mt-6 flex flex-wrap gap-2">{product.tags.map((tag) => <span key={tag} className="rounded border border-white/10 px-2.5 py-1.5 text-[10px] text-white/55">{tag}</span>)}</div>
                 </div>
@@ -360,7 +337,7 @@ export default function Home() {
           </div>
 
           <div className="mt-10 flex flex-col items-start justify-between gap-6 rounded-xl border border-white/10 bg-midnight p-6 sm:flex-row sm:items-center md:p-8">
-            <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow">Punya use case berbeda?</p><p className="mt-2 text-xl font-semibold">Kita bisa mulai dari discovery sprint selama 1–2 minggu.</p></div>
+            <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow">Punya use case berbeda?</p><p className="mt-2 text-xl font-semibold">Kita bisa mulai dari short discovery sprint bersama.</p></div>
             <Link className="button button-light shrink-0" to="/contact">Book discovery call <ArrowRight size={16} /></Link>
           </div>
         </div>
@@ -400,34 +377,42 @@ export default function Home() {
           <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
             <div>
               <p className="section-label text-yellow">/ FIND YOUR PEOPLE</p>
-              <h2 className="section-title mt-5 max-w-3xl">Your chapter is already brewing.</h2>
+              <h2 className="section-title mt-5 max-w-3xl">Local circles, growing city by city.</h2>
             </div>
-            <p className="max-w-sm leading-7 text-white/55">Local chapters and groups for builders who want to learn, ship, and share what works.</p>
+            <p className="max-w-sm leading-7 text-white/55">Place-based circles for people who want to learn, ship, and share what works. Status stays descriptive until chapter-specific engagement is confirmed.</p>
           </div>
 
           <div className="mt-14 grid gap-5 lg:grid-cols-3">
-            {chapters.map((chapter, index) => (
-              <article key={chapter.name} className="chapter-card group">
-                <div className={`h-2 ${chapter.tone}`} />
-                <div className="p-7">
-                  <div className="flex items-start justify-between">
-                    <span className="font-mono text-xs uppercase tracking-[.18em] text-white/45">Chapter 0{index + 1}</span>
-                    <ArrowRight className="transition-transform group-hover:translate-x-1" size={20} />
+            {publicChapters.map((chapter, index) => {
+              const body = (
+                <article className={`chapter-card${chapter.to ? ' group' : ''}`}>
+                  <div className={`h-2 ${chapter.tone}`} />
+                  <div className="p-7">
+                    <div className="flex items-start justify-between">
+                      <span className="font-mono text-xs uppercase tracking-[.18em] text-white/45">Chapter 0{index + 1}</span>
+                      {chapter.to ? <ArrowRight className="transition-transform group-hover:translate-x-1" size={20} /> : null}
+                    </div>
+                    <h3 className="mt-10 text-4xl font-bold">{chapter.name}</h3>
+                    <div className="mt-8 flex flex-wrap gap-3 text-xs text-white/55">
+                      <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.scope}</span>
+                      <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.detail}</span>
+                    </div>
+                    <div className="mt-7 border-t border-white/10 pt-5">
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-white/35">Focus</p>
+                      <p className="mt-2 flex items-center gap-2 text-sm"><MapPin size={15} className="shrink-0 text-yellow" />{chapter.focus}</p>
+                    </div>
                   </div>
-                  <h3 className="mt-10 text-4xl font-bold">{chapter.name}</h3>
-                  <div className="mt-8 flex flex-wrap gap-3 text-xs text-white/55">
-                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.scope}</span>
-                    <span className="rounded-full border border-white/15 px-3 py-1.5">{chapter.detail}</span>
-                  </div>
-                  <div className="mt-7 border-t border-white/10 pt-5">
-                    <p className="font-mono text-[10px] uppercase tracking-widest text-white/35">Group status</p>
-                    <p className="mt-2 flex items-center gap-2 text-sm"><span className="size-2 rounded-full bg-yellow" /> Active group</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              )
+
+              return chapter.to ? (
+                <Link key={chapter.name} to={chapter.to} className="block">{body}</Link>
+              ) : (
+                <div key={chapter.name}>{body}</div>
+              )
+            })}
           </div>
-          <Link className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-yellow" to="/chapters">Explore all groups <ChevronRight size={16} /></Link>
+          <Link className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-yellow" to="/chapters">Explore chapters <ChevronRight size={16} /></Link>
         </div>
       </section>
 
@@ -451,7 +436,7 @@ export default function Home() {
                       <p><span className="text-[#ff8ca1]">const</span> team = community.<span className="text-[#b9a7ff]">findPeople</span>()</p>
                       <p><span className="text-[#ff8ca1]">const</span> result = <span className="text-[#b9a7ff]">await</span> build(idea, team)</p>
                       <p className="mt-5 text-white/70">✓ prototype shipped</p>
-                      <p className="text-white/70">✓ three new friends</p>
+                      <p className="text-white/70">✓ new collaborators</p>
                       <span className="mt-7 inline-block h-4 w-2 animate-pulse bg-yellow" />
                     </div>
                   </div>
@@ -465,7 +450,7 @@ export default function Home() {
               <h2 className="section-title mt-5">Less networking theatre. More making things.</h2>
               <p className="mt-6 text-lg leading-8 text-ink-muted">Come with a half-formed idea, a stubborn problem, or just curiosity. The room does the rest.</p>
               <ul className="mt-9 space-y-5">
-                {['A two-hour, hands-on build sprint', 'Friendly feedback from different disciplines', 'A demo, however beautifully unfinished', 'Coffee, context, and zero gatekeeping'].map((item) => (
+                {['A hands-on build sprint', 'Friendly feedback from different disciplines', 'A demo, however beautifully unfinished', 'Coffee, context, and zero gatekeeping'].map((item) => (
                   <li key={item} className="flex items-center gap-4 border-b border-black/10 pb-5 font-medium"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-yellow"><Check size={15} strokeWidth={3} /></span>{item}</li>
                 ))}
               </ul>
@@ -476,13 +461,13 @@ export default function Home() {
 
       <section className="border-t border-black/10 bg-paper py-24 text-midnight md:py-28">
         <div className="page-shell grid gap-10 lg:grid-cols-[1.2fr_.8fr] lg:items-end">
-          <blockquote>
+          <div>
             <MessageCircle className="text-yellow" size={36} fill="currentColor" />
-            <p className="mt-7 max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">“I came to understand agents. I left with a working prototype and three people I now build with every week.”</p>
-          </blockquote>
+            <p className="mt-7 max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl">Come with a half-formed idea or a stubborn problem. Leave with something more real—and people to keep building with.</p>
+          </div>
           <div className="lg:border-l lg:border-black/15 lg:pl-10">
-            <p className="font-bold">Nadia Putri</p>
-            <p className="mt-1 text-sm text-ink-muted">Product designer · Jabodetabek group</p>
+            <p className="font-bold">How sessions feel</p>
+            <p className="mt-1 text-sm text-ink-muted">Hands-on, multi-role, low gatekeeping—without fabricated testimonials.</p>
           </div>
         </div>
       </section>
