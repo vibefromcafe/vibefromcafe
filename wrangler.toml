@@ -4,6 +4,7 @@ pages_build_output_dir = "build/client"
 
 [vars]
 WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe Coding From Cafe. Yuk gabung ke grup komunitas kami di sini: {{group_link}}"
+VITE_TURNSTILE_SITE_KEY = ""
 
 [[kv_namespaces]]
 binding = "VFC_SUBMISSIONS"
