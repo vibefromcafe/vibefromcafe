@@ -1,7 +1,7 @@
 # Context Glossary
 
 ## Brand
-Vibe From Cafe is an AI community and studio where people learn, share, build, and grow together.
+Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.
 
 ## Domain
 `vibefromcafe.id` is the public web domain for the Brand.

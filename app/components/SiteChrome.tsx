@@ -69,7 +69,7 @@ export function SiteFooter() {
         <div className="grid gap-12 md:grid-cols-[1.2fr_.8fr_.9fr]">
           <div>
             <Link className="text-2xl font-bold text-yellow" to="/">Vibe From Cafe</Link>
-            <p className="mt-7 max-w-md text-lg leading-8 text-white/50">A support system for tech workers navigating the AI shift -- sambil ngopi bareng.</p>
+            <p className="mt-7 max-w-md text-base leading-7 text-white/50">Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.</p>
           </div>
           <div>
             <h2 className="text-xl font-bold">Navigate</h2>

@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Coffee,
   Code2,
-  Cpu,
   Database,
   ExternalLink,
   MapPin,
@@ -180,16 +179,16 @@ export default function Home() {
 
         <div className="page-shell relative z-10 grid items-center gap-16 pb-24 pt-20 lg:grid-cols-[1.1fr_.9fr] lg:pb-28 lg:pt-24">
           <div>
-            <div className="eyebrow mb-7"><span className="status-dot" /> AI community and studio</div>
+            <div className="eyebrow mb-7"><span className="status-dot" /> Community first. Studio adjacent.</div>
             <h1 className="hero-title max-w-[780px]">
-              Learn AI together. Build AI that <span className="highlight-chip">works.</span>
+              Meet, learn, and grow with AI—<span className="highlight-chip">together.</span>
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-8 text-white/65 md:text-xl">
-              Vibe From Cafe adalah komunitas AI tempat orang berdiskusi, belajar, bikin sesi, dan tumbuh bersama. Studio kami menerapkan energi itu untuk membantu bisnis membangun solusi yang benar-benar dipakai.
+              Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link className="button button-primary" to="/contact">Build AI with us <ArrowRight size={18} /></Link>
-              <Link className="button button-ghost" to="/join"><Users size={17} /> Join the community</Link>
+              <Link className="button button-primary" to="/join"><Users size={17} /> Join the community</Link>
+              <Link className="button button-ghost" to="/contact">Work with the studio <ArrowRight size={18} /></Link>
             </div>
             <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/50">
               <span className="flex items-center gap-2"><Users size={17} className="text-yellow" /> 400+ community members</span>
@@ -202,24 +201,26 @@ export default function Home() {
             <div className="absolute -inset-12 rounded-full bg-yellow/15 blur-3xl" />
             <div className="event-card relative rotate-[1.5deg]">
               <div className="flex items-center justify-between border-b border-black/10 px-5 py-4 font-mono text-[11px] font-bold uppercase tracking-[.18em]">
-                <span>Live product / VFC-001</span>
-                <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#f34b42]" /> Deployed</span>
+                <span>Community program / VFC</span>
+                <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-[#72d49c]" /> Open</span>
               </div>
               <div className="p-6 sm:p-8">
                 <div className="mb-10 flex items-start justify-between gap-5">
-                  <span className="grid size-14 place-items-center rounded-xl bg-midnight text-yellow"><Cpu size={28} /></span>
-                  <span className="rounded-full border border-black/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest">AI customer service</span>
+                  <span className="grid size-14 place-items-center rounded-xl bg-midnight text-yellow"><Users size={28} /></span>
+                  <span className="rounded-full border border-black/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest">Across cities & online</span>
                 </div>
-                <p className="font-mono text-xs font-bold uppercase tracking-[.15em] text-black/55">KopiChat</p>
-                <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">Customer questions, answered in seconds.</h2>
+                <p className="font-mono text-xs font-bold uppercase tracking-[.15em] text-black/55">Learn, share, build, grow</p>
+                <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">Find your way into AI, together.</h2>
                 <div className="mt-8 grid gap-3 border-t border-black/10 pt-5 text-sm sm:grid-cols-2">
-                  <span className="flex items-center gap-2"><Bot size={16} /> WhatsApp + Web</span>
-                  <span className="flex items-center gap-2"><Check size={16} /> Human handoff</span>
+                  <span className="flex items-center gap-2"><MessageCircle size={16} /> Discussions & sessions</span>
+                  <span className="flex items-center gap-2"><Code2 size={16} /> Hands-on building</span>
+                  <span className="flex items-center gap-2"><Users size={16} /> Webinars & podcasts</span>
+                  <span className="flex items-center gap-2"><Sparkles size={16} /> Career support</span>
                 </div>
               </div>
             </div>
             <div className="absolute -bottom-8 -left-5 -rotate-6 rounded-lg border-2 border-midnight bg-white px-4 py-3 font-mono text-xs font-bold text-midnight shadow-[6px_6px_0_#17131f] sm:-left-10">
-              repetitive work,<br />now automated ↗
+              bring your curiosity,<br />find your people ↗
             </div>
           </div>
         </div>
@@ -240,9 +241,9 @@ export default function Home() {
       <section id="community" className="bg-paper py-24 text-midnight md:py-32">
         <div className="page-shell">
           <div className="mx-auto max-w-4xl text-center">
-            <p className="section-label">/ ONE SHARED ECOSYSTEM</p>
-            <h2 className="section-title mt-5">Satu ekosistem. Dua cara untuk tumbuh <span className="underline-sketch">bersama.</span></h2>
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-ink-muted">Komunitas mengasah kemampuan kami. Project nyata mempertajam pengetahuan komunitas. Keduanya saling menghidupkan.</p>
+            <p className="section-label">/ COMMUNITY FIRST</p>
+            <h2 className="section-title mt-5">Satu komunitas, dengan studio yang <span className="underline-sketch">berdampingan.</span></h2>
+            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-ink-muted">Komunitas adalah inti VFC. Studio menjadi jalur terpisah untuk membawa pengalaman itu ke project bisnis nyata.</p>
           </div>
 
           <div className="relative mt-16 grid gap-5 lg:grid-cols-2">
@@ -253,7 +254,7 @@ export default function Home() {
               </div>
               <h3 className="mt-12 max-w-md text-3xl font-semibold leading-tight">Belajar, bereksperimen, dan berkembang bersama pengguna AI lainnya.</h3>
               <ul className="mt-8 space-y-4 text-sm text-ink-muted">
-                {['Cafe meetups dan build sessions', 'Knowledge sharing tanpa gatekeeping', 'Kolaborasi lintas profesi dan kota'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-midnight" strokeWidth={3} /> {item}</li>)}
+                {['Discussions, meetups, dan sessions', 'Hands-on building, webinars, dan podcasts', 'Career support lintas profesi dan kota'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-midnight" strokeWidth={3} /> {item}</li>)}
               </ul>
               <Link className="mt-9 inline-flex items-center gap-2 text-sm font-bold underline underline-offset-4" to="/chapters">Temukan chapter Anda <ArrowRight size={16} /></Link>
             </article>
@@ -265,7 +266,7 @@ export default function Home() {
                 <span className="font-mono text-[11px] font-bold uppercase tracking-[.18em] text-white/45">/ AI Studio</span>
                 <span className="grid size-12 place-items-center rounded-lg bg-white text-midnight"><BrainCircuit size={23} /></span>
               </div>
-              <h3 className="mt-12 max-w-md text-3xl font-semibold leading-tight">Menerapkan kemampuan komunitas untuk menyelesaikan masalah bisnis nyata.</h3>
+              <h3 className="mt-12 max-w-md text-3xl font-semibold leading-tight">Jalur adjacent untuk membantu bisnis membangun AI yang berguna.</h3>
               <ul className="mt-8 space-y-4 text-sm text-white/60">
                 {['Discovery dari masalah, bukan tren', 'Design dan engineering end-to-end', 'Dibangun untuk digunakan di production'].map((item) => <li key={item} className="flex items-center gap-3"><Check size={16} className="text-yellow" strokeWidth={3} /> {item}</li>)}
               </ul>
@@ -493,10 +494,10 @@ export default function Home() {
         <div className="page-shell relative z-10 text-center">
           <span className="inline-flex size-16 rotate-3 items-center justify-center rounded-2xl border-2 border-midnight bg-yellow text-midnight shadow-[5px_5px_0_#150f23]"><Coffee size={30} /></span>
           <h2 className="mx-auto mt-8 max-w-4xl text-5xl font-bold leading-[.98] tracking-[-.05em] sm:text-6xl md:text-7xl">Come to learn. Stay to build something real.</h2>
-          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-black/65">Bergabung dengan komunitas atau ajak kami membangun solusi AI untuk bisnis Anda. Dua pintu, satu ekosistem.</p>
+          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-black/65">Masuk lewat komunitas untuk belajar dan bertumbuh bersama. Jika bisnis Anda membutuhkan partner, studio VFC tersedia sebagai jalur adjacent.</p>
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link className="button button-dark" to="/contact">Start an AI project <ArrowRight size={18} /></Link>
-            <Link className="button button-outline-dark" to="/join">Join the community</Link>
+            <Link className="button button-dark" to="/join">Join the community <ArrowRight size={18} /></Link>
+            <Link className="button button-outline-dark" to="/contact">Work with the studio</Link>
           </div>
         </div>
       </section>
@@ -506,7 +507,7 @@ export default function Home() {
           <div className="grid gap-12 md:grid-cols-[1.2fr_.8fr_.9fr]">
             <div>
               <Link className="text-2xl font-bold text-yellow" to="/">Vibe From Cafe</Link>
-              <p className="mt-7 max-w-md text-lg leading-8 text-white/50">A support system for tech workers navigating the AI shift -- sambil ngopi bareng.</p>
+              <p className="mt-7 max-w-md text-base leading-7 text-white/50">Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.</p>
             </div>
             <div>
               <h2 className="text-xl font-bold">Navigate</h2>
