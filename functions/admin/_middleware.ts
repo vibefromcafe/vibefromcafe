@@ -3,22 +3,12 @@ import {
   authenticateAdmin,
   type AdminAuthData,
   type AdminAuthEnv,
-} from "./auth";
+} from "../api/admin/auth";
 
 export const onRequest: PagesFunction<AdminAuthEnv, string, AdminAuthData> = async (context) => {
   const authentication = await authenticateAdmin(context.request, context.env);
   if (!authentication.ok) {
     return adminUnauthorized(authentication.status);
-  }
-
-  if (
-    !["GET", "HEAD", "OPTIONS"].includes(context.request.method) &&
-    context.env.ADMIN_MUTATIONS_ENABLED !== "true"
-  ) {
-    return Response.json(
-      { error: "Admin mutations are disabled in this environment" },
-      { status: 403 },
-    );
   }
 
   context.data.adminActor = authentication.actor;

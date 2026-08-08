@@ -1,4 +1,5 @@
 import type { Submission, SubmissionStatus } from "../../../../app/data/types";
+import type { AdminAuthData } from "../auth";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -30,12 +31,6 @@ const STATUS_FLOW: Record<SubmissionStatus, SubmissionStatus[]> = {
   rejected: ["rejected"],
 };
 
-function deriveInviter(request: Request) {
-  return request.headers.get("cf-access-authenticated-user-email")?.trim()
-    || request.headers.get("cf-access-authenticated-user-name")?.trim()
-    || "admin";
-}
-
 function parseSubmissionStatus(value: unknown): SubmissionStatus | null {
   if (typeof value !== "string") {
     return null;
@@ -59,7 +54,12 @@ function normalizeSubmission(submission: StoredSubmission): Submission {
   };
 }
 
-export const onRequestPatch: PagesFunction<Env, "id"> = async ({ request, env, params }) => {
+export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
+  const actor = data.adminActor;
+  if (!actor) {
+    return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
+  }
+
   const idParam = params.id;
   const id = typeof idParam === "string" ? idParam.trim() : "";
   if (!id) {
@@ -95,6 +95,8 @@ export const onRequestPatch: PagesFunction<Env, "id"> = async ({ request, env, p
     ...current,
     id,
     invitationStatus: targetStatus,
+    updated_by: actor,
+    updated_at: now,
   };
 
   if (currentStatus !== targetStatus && targetStatus === "invited") {
@@ -102,7 +104,7 @@ export const onRequestPatch: PagesFunction<Env, "id"> = async ({ request, env, p
   }
 
   if (currentStatus !== targetStatus && targetStatus === "approved") {
-    updated.approved_by = deriveInviter(request);
+    updated.approved_by = actor;
     updated.approved_at = now;
   }
 

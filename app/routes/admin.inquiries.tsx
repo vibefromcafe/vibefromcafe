@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AdminFrame, adminHeaders } from "../components/AdminChrome";
+import { AdminFrame } from "../components/AdminChrome";
 import type { ProjectInquiry } from "../data/types";
 
 export default function AdminInquiriesPage() {
@@ -11,7 +11,7 @@ export default function AdminInquiriesPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/inquiries", { headers: adminHeaders() });
+      const response = await fetch("/api/admin/inquiries");
       const data = (await response.json()) as { inquiries?: ProjectInquiry[]; error?: string };
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to load inquiries");

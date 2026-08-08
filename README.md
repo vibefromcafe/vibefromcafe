@@ -85,7 +85,7 @@ WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe From C
 
 This is the repository default. The value available to a deployed Function comes from that Pages deployment's runtime configuration and may differ from the repository, including an older or environment-specific override. Before cutover, an owner must verify `WHATSAPP_INVITE_MESSAGE_TEMPLATE` in both preview and production Cloudflare Pages environments without copying private invite URLs or secrets into the repository or PR.
 
-Admin access is protected in deployed environments by Cloudflare Access.
+Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests.
 
 ## Development
 
@@ -129,12 +129,12 @@ pnpm build
 
 Cloudflare Pages should use:
 
-- Preserved Pages project identifier: `vcfc-cloudflare-revamp`
+- Current preview/staging Pages project: `vcfc-cloudflare-revamp`
 - Build command: `pnpm build`
 - Build output directory: `build/client`
 - Functions directory: `functions`
 - KV binding: `VFC_SUBMISSIONS`
 
-Use a staging Pages project and staging KV namespace first. Verify the configured KV namespace belongs to the intended environment before deploying.
+Use the staging Pages project and an isolated staging KV namespace first. Preview and Production must never share the `VFC_SUBMISSIONS` namespace. Verify the configured KV namespace belongs to the intended environment and follow the environment-specific configuration in [Admin security operations](docs/admin-security.md) before deploying.
 
-The project name intentionally retains the historical `vcfc-cloudflare-revamp` identifier. Cloudflare defines `name` as the Pages project name, so changing it as a cosmetic brand cleanup could target a different project. Renaming or creating a Pages project requires a separate, verified Cloudflare cutover decision; this repository change does neither.
+The eventual Production target is the existing `vibefromcafe` Pages project and its dashboard-bound Production `VFC_SUBMISSIONS`; neither is changed or represented as owned by this repository configuration during this phase. The Cloudflare dashboard is authoritative for live project bindings, namespace IDs, Access audiences, secrets, and variables. Connecting or renaming projects, changing domains, rebinding KV, and deploying Production require a separate verified cutover decision; this repository change does none of them.
