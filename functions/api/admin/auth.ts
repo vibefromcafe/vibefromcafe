@@ -1,6 +1,7 @@
 export interface AdminAuthEnv {
   CF_ACCESS_TEAM_DOMAIN?: string;
   CF_ACCESS_AUDIENCE?: string;
+  CF_ACCESS_AUDIENCES?: string;
   ADMIN_SECRET?: string;
   ADMIN_BREAK_GLASS_ENABLED?: string;
   ADMIN_MUTATIONS_ENABLED?: string;
@@ -34,11 +35,21 @@ type Jwks = {
   keys?: JsonWebKeyWithKid[];
 };
 
+type CachedJwks = {
+  jwks: Jwks;
+  expiresAt: number;
+  lastUnknownKidRefreshAt: number;
+};
+
 export type AdminAuthentication =
   | { ok: true; actor: string; method: "access" | "break-glass" }
   | { ok: false; status: 401 | 403 };
 
 const encoder = new TextEncoder();
+const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const JWKS_UNKNOWN_KID_REFRESH_INTERVAL_MS = 10 * 1000;
+const JWKS_CACHE_MAX_ISSUERS = 4;
+const jwksCache = new Map<string, CachedJwks>();
 
 function decodeBase64Url(value: string) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -79,9 +90,31 @@ function configuredIssuer(env: AdminAuthEnv) {
   return url.origin;
 }
 
-function hasAudience(claim: unknown, expected: string) {
-  if (typeof claim === "string") return claim === expected;
-  return Array.isArray(claim) && claim.some((value) => value === expected);
+function configuredAudiences(env: AdminAuthEnv) {
+  const hasSingleAudience = env.CF_ACCESS_AUDIENCE !== undefined;
+  const hasAudienceList = env.CF_ACCESS_AUDIENCES !== undefined;
+  if (hasSingleAudience === hasAudienceList) return null;
+
+  const singleAudience = env.CF_ACCESS_AUDIENCE?.trim();
+  const audienceList = env.CF_ACCESS_AUDIENCES?.trim();
+
+  const audiences = singleAudience
+    ? [singleAudience]
+    : (audienceList ?? "").split(",").map((audience) => audience.trim());
+  if (
+    audiences.length === 0 ||
+    audiences.length > 20 ||
+    audiences.some((audience) => !audience || audience.length > 256)
+  ) {
+    return null;
+  }
+
+  return new Set(audiences);
+}
+
+function hasAudience(claim: unknown, expected: Set<string>) {
+  if (typeof claim === "string") return expected.has(claim);
+  return Array.isArray(claim) && claim.some((value) => typeof value === "string" && expected.has(value));
 }
 
 function timingSafeEqual(first: string, second: string) {
@@ -97,10 +130,52 @@ function timingSafeEqual(first: string, second: string) {
   return difference === 0;
 }
 
+async function fetchJwks(issuer: string, lastUnknownKidRefreshAt = 0) {
+  try {
+    const response = await fetch(`${issuer}/cdn-cgi/access/certs`);
+    if (!response.ok) return null;
+    const jwks = await response.json() as Jwks;
+    if (!Array.isArray(jwks.keys)) return null;
+
+    if (!jwksCache.has(issuer) && jwksCache.size >= JWKS_CACHE_MAX_ISSUERS) {
+      const oldestIssuer = jwksCache.keys().next().value;
+      if (oldestIssuer) jwksCache.delete(oldestIssuer);
+    }
+    jwksCache.set(issuer, {
+      jwks,
+      expiresAt: Date.now() + JWKS_CACHE_TTL_MS,
+      lastUnknownKidRefreshAt,
+    });
+    return jwks;
+  } catch {
+    return null;
+  }
+}
+
+async function getJwks(issuer: string, kid: string) {
+  const now = Date.now();
+  const cached = jwksCache.get(issuer);
+  if (!cached || cached.expiresAt <= now) {
+    return fetchJwks(issuer);
+  }
+
+  if (cached.jwks.keys?.some((key) => key.kid === kid)) {
+    return cached.jwks;
+  }
+
+  // Refresh once for a new signing key, but rate-limit unknown-kid refreshes so
+  // arbitrary tokens cannot turn every request into a JWKS fetch.
+  if (now - cached.lastUnknownKidRefreshAt < JWKS_UNKNOWN_KID_REFRESH_INTERVAL_MS) {
+    return cached.jwks;
+  }
+  cached.lastUnknownKidRefreshAt = now;
+  return fetchJwks(issuer, now);
+}
+
 async function verifyAccessToken(token: string, env: AdminAuthEnv) {
   const issuer = configuredIssuer(env);
-  const audience = env.CF_ACCESS_AUDIENCE?.trim();
-  if (!issuer || !audience) return null;
+  const audiences = configuredAudiences(env);
+  if (!issuer || !audiences) return null;
 
   const parts = token.split(".");
   if (parts.length !== 3 || parts.some((part) => !part)) return null;
@@ -118,7 +193,7 @@ async function verifyAccessToken(token: string, env: AdminAuthEnv) {
 
   if (!header || !payload) return null;
   if (header.alg !== "RS256" || typeof header.kid !== "string") return null;
-  if (payload.iss !== issuer || !hasAudience(payload.aud, audience)) return null;
+  if (payload.iss !== issuer || !hasAudience(payload.aud, audiences)) return null;
 
   const now = Math.floor(Date.now() / 1000);
   if (typeof payload.exp !== "number" || payload.exp <= now) return null;
@@ -127,14 +202,8 @@ async function verifyAccessToken(token: string, env: AdminAuthEnv) {
   // Admin access is identity-only. Service tokens do not carry a verified email.
   if (payload.type !== "app" || typeof payload.email !== "string" || !payload.email.trim()) return null;
 
-  let jwks: Jwks;
-  try {
-    const response = await fetch(`${issuer}/cdn-cgi/access/certs`);
-    if (!response.ok) return null;
-    jwks = await response.json() as Jwks;
-  } catch {
-    return null;
-  }
+  const jwks = await getJwks(issuer, header.kid);
+  if (!jwks) return null;
 
   const jwk = jwks.keys?.find((key) => key.kid === header.kid && key.kty === "RSA");
   if (!jwk) return null;

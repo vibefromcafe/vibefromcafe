@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
-import { AdminFrame, adminHeaders } from "../components/AdminChrome";
+import { AdminFrame } from "../components/AdminChrome";
 import type { Event } from "../data/types";
 
 export default function AdminEventsPage() {
@@ -13,7 +13,7 @@ export default function AdminEventsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/events", { headers: adminHeaders() });
+      const response = await fetch("/api/admin/events");
       const data = (await response.json()) as { events?: Event[]; error?: string };
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to load events");
@@ -29,7 +29,6 @@ export default function AdminEventsPage() {
   async function deleteEvent(id: string) {
     const response = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, {
       method: "DELETE",
-      headers: adminHeaders(),
     });
     if (!response.ok) {
       const data = (await response.json()) as { error?: string };

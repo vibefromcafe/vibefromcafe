@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { NavLink } from "react-router";
 import { PageFrame } from "./SiteChrome";
 
@@ -7,13 +8,13 @@ const adminMenu = [
   { label: "Events", to: "/admin/events" },
 ];
 
-export function adminHeaders(): Record<string, string> {
-  // Cloudflare Access injects the assertion at the edge; browser code must not
-  // persist or handle a production admin credential.
-  return {};
-}
-
 export function AdminFrame({ title, intro, children }: { title: string; intro: string; children: React.ReactNode }) {
+  useEffect(() => {
+    // Remove credentials persisted by the legacy admin UI without reading or
+    // transmitting them. This migration cleanup can be removed after cutover.
+    window.localStorage.removeItem("vcfc-admin-secret");
+  }, []);
+
   return (
     <PageFrame eyebrow="/ ADMIN" title={title} intro={intro}>
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">

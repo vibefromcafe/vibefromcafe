@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { AdminFrame, adminHeaders } from "../components/AdminChrome";
+import { AdminFrame } from "../components/AdminChrome";
 import { EventForm, type EventFormValue } from "../components/EventForm";
 import type { Event } from "../data/types";
 
@@ -13,7 +13,7 @@ export default function AdminEditEventPage() {
   useEffect(() => {
     async function loadEvent() {
       if (!id) return;
-      const response = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, { headers: adminHeaders() });
+      const response = await fetch(`/api/admin/events/${encodeURIComponent(id)}`);
       const data = (await response.json()) as { event?: Event; error?: string };
       if (!response.ok) {
         setError(data.error ?? "Failed to load event");
@@ -29,7 +29,7 @@ export default function AdminEditEventPage() {
     setError(null);
     const response = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(value),
     });
     const data = (await response.json()) as { error?: string };

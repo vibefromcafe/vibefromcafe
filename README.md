@@ -129,7 +129,7 @@ pnpm build
 
 Cloudflare Pages should use:
 
-- Preserved Pages project identifier: `vcfc-cloudflare-revamp`
+- Current preview/staging Pages project: `vcfc-cloudflare-revamp`
 - Build command: `pnpm build`
 - Build output directory: `build/client`
 - Functions directory: `functions`
@@ -137,4 +137,4 @@ Cloudflare Pages should use:
 
 Use the staging Pages project and an isolated staging KV namespace first. Preview and Production must never share the `VFC_SUBMISSIONS` namespace. Verify the configured KV namespace belongs to the intended environment and follow the environment-specific configuration in [Admin security operations](docs/admin-security.md) before deploying.
 
-The project name intentionally retains the historical `vcfc-cloudflare-revamp` identifier. Cloudflare defines `name` as the Pages project name, so changing it as a cosmetic brand cleanup could target a different project. Renaming or creating a Pages project requires a separate, verified Cloudflare cutover decision; this repository change does neither.
+The eventual Production target is the existing `vibefromcafe` Pages project and its dashboard-bound Production `VFC_SUBMISSIONS`; neither is changed or represented as owned by this repository configuration during this phase. The Cloudflare dashboard is authoritative for live project bindings, namespace IDs, Access audiences, secrets, and variables. Connecting or renaming projects, changing domains, rebinding KV, and deploying Production require a separate verified cutover decision; this repository change does none of them.

@@ -10,11 +10,13 @@ Admin pages and APIs must remain protected even when a custom domain, Pages doma
 Validate the Cloudflare Access application token in Pages Functions for both `/admin*` and `/api/admin/*`. Validation requires:
 
 - an RS256 signature from the configured Access team JWKS;
-- the exact configured team-domain issuer and application audience;
+- the exact configured team-domain issuer and either one exact application audience or an explicit audience allow-list;
 - an unexpired token which is not used before its `nbf` time; and
 - an identity application token with a verified email claim.
 
 Cloudflare Access policy remains the production authorization source: only identities allowed by the admin application's policy can obtain a token for its audience.
+
+One application/audience should cover all environment hosts where practical. Environments that require multiple applications use the explicit `CF_ACCESS_AUDIENCES` allow-list. Setting it together with singular `CF_ACCESS_AUDIENCE`, or accepting arbitrary audiences from the configured team, fails closed. JWKS responses use a bounded five-minute in-memory cache and rate-limited refresh on an unknown key ID.
 
 There is no hostname-based localhost bypass. `X-Admin-Secret` is accepted only when `ADMIN_BREAK_GLASS_ENABLED=true` and `ADMIN_SECRET` are both explicitly configured. The browser does not store or send this secret.
 

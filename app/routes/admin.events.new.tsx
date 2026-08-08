@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { AdminFrame, adminHeaders } from "../components/AdminChrome";
+import { AdminFrame } from "../components/AdminChrome";
 import { EventForm, type EventFormValue } from "../components/EventForm";
 
 export default function AdminNewEventPage() {
@@ -11,7 +11,7 @@ export default function AdminNewEventPage() {
     setError(null);
     const response = await fetch("/api/admin/events", {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(value),
     });
     const data = (await response.json()) as { error?: string };

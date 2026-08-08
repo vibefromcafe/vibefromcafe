@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { AdminFrame, adminHeaders } from "../components/AdminChrome";
+import { AdminFrame } from "../components/AdminChrome";
 import type { Submission } from "../data/types";
 
 type SubmissionsResponse = {
@@ -17,7 +17,7 @@ export default function AdminSubmissionsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/submissions", { headers: adminHeaders() });
+      const response = await fetch("/api/admin/submissions");
       const data = (await response.json()) as SubmissionsResponse;
       if (!response.ok) {
         throw new Error(data.error ?? "Failed to load submissions");
@@ -33,7 +33,7 @@ export default function AdminSubmissionsPage() {
   async function updateStatus(id: string, invitationStatus: Submission["invitationStatus"]) {
     const response = await fetch(`/api/admin/submissions/${encodeURIComponent(id)}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ invitationStatus }),
     });
     if (!response.ok) {

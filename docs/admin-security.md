@@ -9,9 +9,28 @@ Both route trees are protected in Pages Functions:
 - `/admin` and every descendant route;
 - `/api/admin` and every descendant route.
 
-The application accepts only a valid Cloudflare Access identity application token. It fetches the configured team's JWKS, verifies the RS256 signature, issuer, audience, expiry and not-before claims, and derives the mutation actor from the signed email claim. A service token is not an admin identity.
+The application accepts only a valid Cloudflare Access identity application token. It fetches the configured team's JWKS, verifies the RS256 signature, exact issuer, explicitly configured audience, expiry and not-before claims, and derives the mutation actor from the signed email claim. JWKS responses are cached in-memory for at most five minutes, with a rate-limited refresh when a token names an unknown key ID. A service token is not an admin identity.
 
 The normal browser interface uses the Access session injected by Cloudflare. It never reads, stores, or sends a shared admin secret. Break-glass access is disabled unless both `ADMIN_BREAK_GLASS_ENABLED=true` and an `ADMIN_SECRET` secret are deliberately set. Do not enable break-glass in Production or Preview as routine configuration.
+
+### Access audience topology
+
+Choose one topology per Pages environment:
+
+1. If one Access application and audience covers every supported admin hostname in that environment, set `CF_ACCESS_AUDIENCE` to that exact audience.
+2. If multiple Access applications are required for the environment's hosts, leave `CF_ACCESS_AUDIENCE` unset and set `CF_ACCESS_AUDIENCES` to an explicit comma-separated allow-list of their exact audiences.
+
+Never set both variables. Ambiguous, empty, or malformed configuration fails closed. A token must retain the exact configured team-domain issuer and must contain at least one exact allow-listed audience; another audience issued by the same Access team is not accepted automatically. Keep Production and Preview allow-lists separate and include only applications confirmed by the private host inventory.
+
+## Deployment environment model
+
+| Environment | Pages project and data contract |
+| --- | --- |
+| Eventual Production | The existing Cloudflare Pages project is `vibefromcafe`. Its dashboard-bound Production `VFC_SUBMISSIONS` is the production-looking namespace inherited from the legacy deployment. Do not copy its ID into this repository, rebind it, deploy to it, or change its source connection during this phase. |
+| Preview/staging | The canonical repository currently targets `vcfc-cloudflare-revamp`. Its `VFC_SUBMISSIONS` must remain an isolated non-production namespace and `ADMIN_MUTATIONS_ENABLED` must remain false or unset by default. The checked-in Wrangler configuration is not evidence of the live dashboard binding. |
+| Local development | `wrangler pages dev` uses local Wrangler data/emulation. Use synthetic records only; local work must not depend on or connect to either deployed namespace. |
+
+The Cloudflare dashboard is authoritative for actual Pages environment bindings, KV namespace IDs, Access applications and audiences, secrets, and runtime variables. Repository names and configuration document intent only; they do not prove current deployed state or ownership of any namespace ID.
 
 ## Required Cloudflare dashboard configuration
 
@@ -34,7 +53,8 @@ Configure these runtime variables separately for **Production** and **Preview**:
 | Variable | Production | Preview |
 | --- | --- | --- |
 | `CF_ACCESS_TEAM_DOMAIN` | Exact HTTPS Access team domain | Same team domain |
-| `CF_ACCESS_AUDIENCE` | Audience of the application covering Production hosts | Audience of the application covering Preview hosts |
+| `CF_ACCESS_AUDIENCE` | One exact Production audience, if one application covers all Production hosts | One exact Preview audience, if one application covers all Preview hosts |
+| `CF_ACCESS_AUDIENCES` | Explicit Production audience allow-list when multiple applications are required; otherwise unset | Explicit Preview audience allow-list when multiple applications are required; otherwise unset |
 | `ADMIN_MUTATIONS_ENABLED` | `true` after authenticated write smoke tests are approved | `false` or unset |
 | `ADMIN_BREAK_GLASS_ENABLED` | `false` or unset | `false` or unset |
 | `ADMIN_SECRET` | Unset for normal operation | Unset |
@@ -48,6 +68,30 @@ Under **Settings > Bindings**, inspect Production and Preview independently:
 
 The `ADMIN_MUTATIONS_ENABLED` guard prevents writes when unset, but it does not make a shared production KV binding acceptable: admin GET routes can read personal data. Binding isolation is mandatory.
 
+## Read-only-first production validation and mutation gates
+
+No step in this section authorizes a repository connection, domain change, KV rebind, deployment, or Cloudflare mutation. An authorized Cloudflare owner must perform and privately record those actions in a later deployment phase.
+
+Start with read-only evidence:
+
+1. In the dashboard, inventory the existing `vibefromcafe` Production project and every custom, canonical Pages, branch, immutable Preview, and staging hostname. Record only redacted labels in GitHub.
+2. Read the Production and Preview bindings independently. Confirm the dashboard shows distinct `VFC_SUBMISSIONS` namespaces; do not reveal or alter their IDs.
+3. Read the Access application, policy, issuer, and audience assignments for every host. Confirm the intended singular audience or explicit allow-list can be configured without accepting unrelated same-team applications.
+4. Read the deployed variables and secrets. Confirm Preview mutations and break-glass are false/unset, normal Production break-glass is false/unset, and no browser-managed admin secret is required.
+5. Against an authorized deployment of this code, run anonymous and forged-assertion probes first. Continue to authenticated GETs only after those fail closed. Do not inspect or print response bodies containing personal data.
+
+Production mutations remain disabled until all of these gates have evidence and approval:
+
+- canonical CI, the focused admin-security suite, typecheck, and build pass for the deployed commit;
+- every inventoried host protects both admin route trees at the edge and in the application;
+- exact issuer and audience configuration is verified for each environment;
+- Production and Preview KV isolation is verified in the dashboard;
+- anonymous, malformed, forged-signature, wrong-issuer, wrong-audience, and invalid-assertion-plus-break-glass attempts fail closed;
+- an authorized operator can complete read-only admin checks, and browser inspection finds no stored shared secret or `X-Admin-Secret` request header;
+- an owner explicitly approves enabling Production mutations and a rollback plan; Preview remains disabled.
+
+Only after those gates may an authorized owner set Production `ADMIN_MUTATIONS_ENABLED=true` and run the synthetic attribution checks below. Issue #5 stays open until the deployed every-host evidence, including attributed Production writes and denied Preview writes, is recorded.
+
 ## Host and Access inventory findings (2026-07-18, redacted)
 
 Read-only public inspection found:
@@ -60,7 +104,7 @@ Read-only public inspection found:
 
 These are pre-deployment observations only. Do not treat the apex result as proof that every hostname or route is covered.
 
-## Smoke tests
+## Post-deployment smoke tests
 
 Build a private host list from the dashboard inventory. For every host, test all concrete admin routes listed in the application README plus these API patterns:
 
