@@ -80,7 +80,7 @@ export default function JoinPage() {
   }
 
   return (
-    <PageFrame eyebrow="/ JOIN THE COMMUNITY" title="Come to learn. Stay to build something real." intro="Kamu tidak sendirian menghadapi AI shift. Gabung dengan builders lintas profesi dan kota yang belajar bareng.">
+    <PageFrame eyebrow="/ JOIN THE COMMUNITY" title="Come to learn. Stay to build something real." intro="Join discussions, sessions, hands-on builds, webinars, podcasts, and career support with people across professions and cities.">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
         <div className="dark-card">
           {submitted ? (
@@ -88,13 +88,13 @@ export default function JoinPage() {
               {whatsappInvite?.groupInviteUrl ? (
                 <>
                   <h2 className="text-3xl font-bold text-yellow">You're invited!</h2>
-                  <p className="mx-auto max-w-xl leading-7 text-white/55">We received your details. Join the WhatsApp group now to continue onboarding with the VCFC community.</p>
+                  <p className="mx-auto max-w-xl leading-7 text-white/55">We received your details. Join the WhatsApp group to find VFC discussions, sessions, builds, webinars, podcasts, and career support.</p>
                   <a className="button bg-yellow text-midnight" href={whatsappInvite.groupInviteUrl} target="_blank" rel="noreferrer">Join WhatsApp group <ArrowRight size={16} /></a>
                 </>
               ) : (
                 <>
                   <h2 className="text-3xl font-bold text-yellow">Thanks, your submission is in.</h2>
-                  <p className="leading-7 text-white/55">We received your details. Tim VCFC bakal share the WhatsApp invite soon.</p>
+                  <p className="leading-7 text-white/55">We received your details. Tim VFC bakal share the WhatsApp invite soon.</p>
                 </>
               )}
             </div>

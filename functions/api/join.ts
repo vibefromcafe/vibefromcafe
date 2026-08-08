@@ -16,7 +16,7 @@ interface SubmissionBody {
 }
 
 const DEFAULT_WHATSAPP_INVITE_MESSAGE =
-  "Hi {{name}}, welcome to Vibe Coding From Cafe. Join our WhatsApp community here: {{group_link}}";
+  "Hi {{name}}, welcome to Vibe From Cafe. Join our community for discussions, sessions, hands-on building, webinars, podcasts, and career support: {{group_link}}";
 
 function resolveInviteConfig(env: Env) {
   return {

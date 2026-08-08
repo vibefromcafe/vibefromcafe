@@ -24,9 +24,9 @@ const footerConnect = [
 
 export function SiteBrand({ compact = false }: { compact?: boolean }) {
   return (
-    <Link className="brand-mark" to="/" aria-label="Vibe Coding From Cafe home">
+    <Link className="brand-mark" to="/" aria-label="Vibe From Cafe home">
       <span className="brand-icon"><Coffee size={compact ? 18 : 22} strokeWidth={2.6} /></span>
-      <span className={compact ? 'hidden sm:inline' : ''}>Vibe Coding From Cafe</span>
+      <span className={compact ? 'hidden sm:inline' : ''}>Vibe From Cafe</span>
     </Link>
   )
 }
@@ -68,8 +68,8 @@ export function SiteFooter() {
       <div className="page-shell">
         <div className="grid gap-12 md:grid-cols-[1.2fr_.8fr_.9fr]">
           <div>
-            <Link className="text-2xl font-bold text-yellow" to="/">Vibe Coding From Cafe</Link>
-            <p className="mt-7 max-w-md text-lg leading-8 text-white/50">A support system for tech workers navigating the AI shift -- sambil ngopi bareng.</p>
+            <Link className="text-2xl font-bold text-yellow" to="/">Vibe From Cafe</Link>
+            <p className="mt-7 max-w-md text-base leading-7 text-white/50">Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.</p>
           </div>
           <div>
             <h2 className="text-xl font-bold">Navigate</h2>
@@ -93,7 +93,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-16 border-t border-white/10 pt-10 text-center text-lg text-white/40">
-          Vibe Coding From Cafe -- Made with warmth from Indonesia.
+          Vibe From Cafe -- Made with warmth from Indonesia.
         </div>
       </div>
     </footer>

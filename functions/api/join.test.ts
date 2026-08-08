@@ -50,7 +50,7 @@ describe("join api", () => {
         }),
         env: {
           VFC_SUBMISSIONS: kv,
-          WHATSAPP_GROUP_INVITE_URL: "https://chat.whatsapp.com/vcfc-group",
+          WHATSAPP_GROUP_INVITE_URL: "https://chat.whatsapp.com/vfc-group",
           WHATSAPP_INVITE_MESSAGE_TEMPLATE: "Hi {{name}}, join {{group_link}}",
         },
       }),
@@ -67,7 +67,7 @@ describe("join api", () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.submission).toEqual({ id: stored.id, invitationStatus: "invited" });
-    expect(body.whatsappInvite.groupInviteUrl).toBe("https://chat.whatsapp.com/vcfc-group");
+    expect(body.whatsappInvite.groupInviteUrl).toBe("https://chat.whatsapp.com/vfc-group");
     expect(key).toBe(`submission:${stored.id}`);
     expect(stored.invitationStatus).toBe("invited");
     expect(stored.invited_at).toBeTruthy();

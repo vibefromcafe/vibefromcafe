@@ -48,7 +48,7 @@ export default function ContactPage() {
   }
 
   return (
-    <PageFrame eyebrow="/ CONTACT" title="Tell us the AI project you want to make real." intro="A lightweight intake for businesses that want VCFC to design and build useful AI assistants, automation, or custom products.">
+    <PageFrame eyebrow="/ ADJACENT AI STUDIO" title="Tell us the AI project you want to make real." intro="Separate from our community programs, the adjacent VFC studio helps businesses design and build useful AI assistants, automation, and custom products.">
       <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr]">
         <div className="dark-card">
           {submitted ? (

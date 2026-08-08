@@ -16,7 +16,7 @@ export default function ChapterJogjaPage() {
     .slice(0, 6);
 
   return (
-    <PageFrame eyebrow="/ JOGJA CHAPTER" title="Vibe Coding Jogja." intro="The first active chapter: builders learning AI together from real cafe workspaces in Yogyakarta.">
+    <PageFrame eyebrow="/ JOGJA CHAPTER" title="VFC Jogja." intro="The first active chapter: builders learning AI together from real cafe workspaces in Yogyakarta.">
       <div className="grid gap-5 md:grid-cols-3">
         <div className="dark-card"><Coffee className="text-yellow" /><p className="mt-8 text-4xl font-bold">{jogjaCafes.length}</p><p className="mt-2 text-white/45">Deprecated cafe data points retained for chapter context.</p></div>
         <div className="dark-card"><Wifi className="text-yellow" /><p className="mt-8 text-4xl font-bold">{topCafes[0]?.wifi_speed ?? "N/A"}</p><p className="mt-2 text-white/45">Top recorded WiFi speed from the archived cafe dataset.</p></div>
