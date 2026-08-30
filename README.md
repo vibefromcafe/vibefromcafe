@@ -60,9 +60,13 @@ Key prefixes:
 - `submission:{id}` for community join submissions
 - `inquiry:{id}` for project inquiries
 - `event:{id}` for event overrides and custom events
-- `event_deleted:{id}` for seed event deletion markers
+- `event-deleted:{id}` for seed event deletion markers
 
 Seed event data lives in `app/data/events.json`. Deprecated cafe support data lives in `app/data/cafes.json` and is only used for chapter context.
+
+For export, migration, reconciliation, and rollback procedures, see the
+[Cloudflare KV cutover runbook](docs/cloudflare-kv-cutover.md). The tooling is
+dry-run-first and redacts record contents from reports.
 
 ## Environment
 

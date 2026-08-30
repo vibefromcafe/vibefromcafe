@@ -9,6 +9,8 @@
     "start": "vite preview build/client",
     "typecheck": "react-router typegen && tsc",
     "test": "vitest run",
+    "test:kv-cutover": "node --test scripts/kv-cutover.node.mjs",
+    "kv:cutover": "node scripts/kv-cutover.mjs",
     "cf:dev": "pnpm dlx wrangler pages dev build/client"
   },
   "dependencies": {
