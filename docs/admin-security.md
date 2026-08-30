@@ -27,7 +27,7 @@ Never set both variables. Ambiguous, empty, or malformed configuration fails clo
 | Environment | Pages project and data contract |
 | --- | --- |
 | Eventual Production | The existing Cloudflare Pages project is `vibefromcafe`. Its dashboard-bound Production `VFC_SUBMISSIONS` is the production-looking namespace inherited from the legacy deployment. Do not copy its ID into this repository, rebind it, deploy to it, or change its source connection during this phase. |
-| Preview/staging | The canonical repository currently targets `vcfc-cloudflare-revamp`. Its `VFC_SUBMISSIONS` must remain an isolated non-production namespace and `ADMIN_MUTATIONS_ENABLED` must remain false or unset by default. The checked-in Wrangler configuration is not evidence of the live dashboard binding. |
+| Preview/staging | The stale `vcfc-cloudflare-revamp` deployment is not accessible in the VFC account and is not an operable staging target. Create a separately approved replacement staging project in the accessible VFC account. Its `VFC_SUBMISSIONS` must use an isolated non-production namespace and `ADMIN_MUTATIONS_ENABLED` must remain false or unset. The checked-in Wrangler configuration is not evidence of any live dashboard binding. |
 | Local development | `wrangler pages dev` uses local Wrangler data/emulation. Use synthetic records only; local work must not depend on or connect to either deployed namespace. |
 
 The Cloudflare dashboard is authoritative for actual Pages environment bindings, KV namespace IDs, Access applications and audiences, secrets, and runtime variables. Repository names and configuration document intent only; they do not prove current deployed state or ownership of any namespace ID.
@@ -103,6 +103,19 @@ Read-only public inspection found:
 - Cloudflare credentials were not available, so applications, policies, audiences, hidden custom/staging hosts, branch aliases, and immutable preview hostnames could not be enumerated privately.
 
 These are pre-deployment observations only. Do not treat the apex result as proof that every hostname or route is covered.
+
+## Authenticated read-only inventory findings (2026-08-30, redacted)
+
+A scoped GET-only API inventory of the accessible VFC account found:
+
+- the account contains the existing `vibefromcafe` Pages project but not the stale `vcfc-cloudflare-revamp` project;
+- the existing project still uses the legacy repository as its Git source and deploys `main`;
+- the custom apex and one canonical `pages.dev` domain are attached; the zone has an apex DNS record but no `www` record;
+- both Production and Preview configure `VFC_SUBMISSIONS`, but they point to the **same namespace** (isolation failure);
+- the only Access application is self-hosted and covers the apex, not the canonical `pages.dev` hostname;
+- the only environment variable names visible in both Production and Preview are the WhatsApp invite URL and message template; the required Access issuer/audience and admin mutation/break-glass variables are absent.
+
+This inventory made no Cloudflare mutation and retained no identifiers, values, audiences, records, or private URLs. It is decisive **NO-GO** evidence: Preview can read or write Production personal data, the Pages hostname is not covered at the edge, and this code cannot validate Access tokens until environment-specific issuer/audience configuration exists. Create an accessible isolated staging project before any deployment rehearsal. Do not reconnect the Production Git source, rebind KV, configure Access, or deploy until those mutations are separately approved.
 
 ## Post-deployment smoke tests
 
