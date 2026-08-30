@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Coffee, Menu, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router'
 
@@ -33,6 +33,50 @@ export function SiteBrand({ compact = false }: { compact?: boolean }) {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const menuButton = menuButtonRef.current
+    const mobileMenu = mobileMenuRef.current
+    const menuLinks = Array.from(mobileMenu?.querySelectorAll<HTMLElement>('a[href]') ?? [])
+    const focusableElements = menuButton ? [menuButton, ...menuLinks] : menuLinks
+
+    menuLinks[0]?.focus()
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setOpen(false)
+        menuButton?.focus()
+        return
+      }
+
+      if (event.key !== 'Tab' || focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const activeElement = document.activeElement
+
+      if (event.shiftKey && (activeElement === firstElement || !focusableElements.includes(activeElement as HTMLElement))) {
+        event.preventDefault()
+        lastElement.focus()
+      } else if (!event.shiftKey && (activeElement === lastElement || !focusableElements.includes(activeElement as HTMLElement))) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open])
+
+  function closeMenu() {
+    setOpen(false)
+    menuButtonRef.current?.focus()
+  }
 
   return (
     <header className="site-header">
@@ -45,16 +89,16 @@ export function SiteHeader() {
           ))}
           <Link className="button button-small bg-yellow text-midnight" to="/join">Join</Link>
         </div>
-        <button className="grid size-11 place-items-center rounded-lg border border-white/15 md:hidden" type="button" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+        <button ref={menuButtonRef} className="grid size-11 place-items-center rounded-lg border border-white/15 md:hidden" type="button" aria-label={open ? 'Close menu' : 'Open menu'} aria-controls="mobile-navigation" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
       {open ? (
-        <div className="page-shell border-t border-white/10 py-6 md:hidden">
+        <div ref={mobileMenuRef} id="mobile-navigation" className="page-shell border-t border-white/10 py-6 md:hidden">
           <div className="flex flex-col gap-5 text-lg text-white/75">
-            <a href="https://cafein.id" target="_blank" rel="noreferrer">Cafes</a>
-            {navigation.map((item) => <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)}>{item.label}</NavLink>)}
-            <Link className="text-yellow" to="/join" onClick={() => setOpen(false)}>Join community →</Link>
+            <a href="https://cafein.id" target="_blank" rel="noreferrer" onClick={closeMenu}>Cafes</a>
+            {navigation.map((item) => <NavLink key={item.to} to={item.to} onClick={closeMenu}>{item.label}</NavLink>)}
+            <Link className="text-yellow" to="/join" onClick={closeMenu}>Join community →</Link>
           </div>
         </div>
       ) : null}

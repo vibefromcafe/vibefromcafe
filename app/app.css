@@ -117,3 +117,9 @@
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #f5c400;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px #08070b;
+}
