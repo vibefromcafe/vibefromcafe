@@ -127,6 +127,7 @@ Build a private host list from the dashboard inventory. For every host, test all
 - `GET /api/admin/events/<existing-id>`
 - `GET /api/admin/security`
 - `PATCH /api/admin/submissions/<test-id>`
+- `PATCH /api/admin/inquiries/<test-id>`
 - `POST /api/admin/events`
 - `PATCH /api/admin/events/<test-id>`
 - `DELETE /api/admin/events/<test-id>`

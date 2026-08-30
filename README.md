@@ -111,7 +111,7 @@ Pages can bind an external Durable Object, but cannot create or deploy one. An a
 
 The exact external Worker script name, Durable Object class, namespace/migration, cost acceptance, and Preview/Production bindings are intentionally not present in this repository because they require the unresolved operator/resource decision in issue #27. Do not add placeholder `[[durable_objects.bindings]]` configuration and call it deployed. Before enabling writes, retain redacted evidence that at least 100 concurrent requests near rolling-window edges and multi-PoP traffic stay within the approved tolerance for both endpoints.
 
-Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. Protected `/admin/health` and `/api/admin/security` report status and blockers without values. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests, and [Privacy operations](docs/privacy-operations.md) for the repository deletion workflow and remaining operator gates.
+Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. Protected `/admin/health` and `/api/admin/security` report status and blockers without values. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests, [Admin intake workflow](docs/admin-intake.md) for bounded triage/correction behavior, and [Privacy operations](docs/privacy-operations.md) for the repository deletion workflow and remaining operator gates.
 
 ## Development
 

@@ -55,9 +55,9 @@ KV listing is eventually consistent, so the repository cannot prove that a racin
 
 ## Correction and export
 
-Existing protected admin list APIs can locate and export live operational records. Treat any export as sensitive, least-privilege, encrypted, and short-lived; do not place it in tickets, chat, test fixtures, logs, or this repository.
+The protected admin intake pages can locate and correct live operational records after an approved identity check. Every correction records the verified actor and time. Existing reverse references continue pointing to the corrected record, but changing WhatsApp/contact/message fingerprint material does not atomically re-key the existing dedupe marker. A later form using only the corrected identifier may therefore create a separately discoverable record. Reconcile this residual KV race during the approved issue #30 procedure; do not claim that correction atomically updates deduplication state.
 
-No general personal-field correction API is added in this wave. A correction that changes WhatsApp/contact/message fingerprint material must atomically re-key its dedupe reference and marker or use delete-and-resubmit under an approved procedure. Until that workflow is implemented and drilled, operators must not represent correction as automated or deletion-complete.
+No bulk export endpoint or UI is provided. Export remains blocked until an owner approves its purpose, access, retention, secure delivery, and audit policy. Do not place exported data in tickets, chat, test fixtures, logs, or this repository.
 
 ## Retention and drill gates
 

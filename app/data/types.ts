@@ -60,12 +60,14 @@ export interface Submission {
   approved_at?: string;
   updated_by?: string;
   updated_at?: string;
+  assigned_to?: string;
+  admin_notes?: string;
   privacyConsentAt?: string;
   privacyConsentVersion?: string;
   createdAt: string;
 }
 
-export type InquiryStatus = "new" | "contacted" | "closed";
+export type InquiryStatus = "new" | "contacted" | "closed" | "spam";
 
 export interface ProjectInquiry {
   id: string;
@@ -73,6 +75,11 @@ export interface ProjectInquiry {
   contact: string;
   message: string;
   status: InquiryStatus;
+  allowedNextStatuses?: InquiryStatus[];
+  assigned_to?: string;
+  admin_notes?: string;
+  updated_by?: string;
+  updated_at?: string;
   privacyConsentAt?: string;
   privacyConsentVersion?: string;
   createdAt: string;

@@ -1,4 +1,9 @@
 import type { Submission, SubmissionStatus } from "../../../app/data/types";
+import {
+  parseIntakeListOptions,
+  parseSubmissionStatus,
+  SUBMISSION_STATUS_FLOW,
+} from "./intake";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -14,28 +19,10 @@ const SUBMISSION_PREFIX = "submission:";
 const DEFAULT_WHATSAPP_INVITE_MESSAGE =
   "Hi {{name}}, welcome to Vibe From Cafe. Join our community for discussions, sessions, hands-on building, webinars, podcasts, and career support: {{group_link}}";
 
-const STATUS_FLOW: Record<SubmissionStatus, SubmissionStatus[]> = {
-  signed_up: ["signed_up", "invited"],
-  invited: ["invited", "requested_to_join"],
-  requested_to_join: ["requested_to_join", "approved", "rejected"],
-  approved: ["approved"],
-  rejected: ["rejected"],
-};
-
-function parseSubmissionStatus(value: unknown): SubmissionStatus {
-  if (value === "invited" || value === "requested_to_join" || value === "approved" || value === "rejected" || value === "signed_up") {
-    return value;
-  }
-  if (value === "pending") return "signed_up";
-  if (value === "joined") return "requested_to_join";
-  if (value === "declined") return "rejected";
-  return "signed_up";
-}
-
 function normalizeSubmission(submission: StoredSubmission): Submission {
   return {
     ...submission,
-    invitationStatus: parseSubmissionStatus(submission.invitationStatus),
+    invitationStatus: parseSubmissionStatus(submission.invitationStatus) ?? "signed_up",
   };
 }
 
@@ -47,35 +34,41 @@ function resolveInviteConfig(env: Env) {
   };
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  const options = parseIntakeListOptions(request, parseSubmissionStatus);
+  if (options instanceof Response) return options;
+
   const submissions: Submission[] = [];
-  let cursor: string | undefined;
+  const listing = await env.VFC_SUBMISSIONS.list({
+    prefix: SUBMISSION_PREFIX,
+    cursor: options.cursor,
+    limit: options.limit,
+  });
 
-  do {
-    const listing = await env.VFC_SUBMISSIONS.list({
-      prefix: SUBMISSION_PREFIX,
-      cursor,
-      limit: 1000,
-    });
+  const batch = await Promise.all(
+    listing.keys.map((key) => env.VFC_SUBMISSIONS.get<StoredSubmission>(key.name, "json")),
+  );
 
-    const batch = await Promise.all(
-      listing.keys.map((key) => env.VFC_SUBMISSIONS.get<StoredSubmission>(key.name, "json")),
-    );
-
-    for (const submission of batch) {
-      if (submission) {
-        const normalized = normalizeSubmission(submission);
-        submissions.push({
-          ...normalized,
-          allowedNextStatuses: STATUS_FLOW[normalized.invitationStatus] ?? [normalized.invitationStatus],
-        });
-      }
+  for (const submission of batch) {
+    if (submission) {
+      const normalized = normalizeSubmission(submission);
+      if (options.status && normalized.invitationStatus !== options.status) continue;
+      submissions.push({
+        ...normalized,
+        allowedNextStatuses: [...SUBMISSION_STATUS_FLOW[normalized.invitationStatus]],
+      });
     }
-
-    cursor = listing.list_complete ? undefined : listing.cursor;
-  } while (cursor);
+  }
 
   submissions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  return Response.json({ submissions, whatsappInvite: resolveInviteConfig(env) });
+  return Response.json(
+    {
+      submissions,
+      nextCursor: listing.list_complete ? null : listing.cursor,
+      scannedCount: listing.keys.length,
+      whatsappInvite: resolveInviteConfig(env),
+    },
+    { headers: { "cache-control": "no-store" } },
+  );
 };
