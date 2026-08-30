@@ -7,6 +7,7 @@ import {
   rejectUnknownFields,
 } from "../../form-protection";
 import type { AdminAuthData } from "../auth";
+import { auditMutation, type AuditedField } from "../../observability";
 import {
   optionalPatchText,
   parseSubmissionStatus,
@@ -44,6 +45,7 @@ function normalizeSubmission(submission: StoredSubmission): Submission {
 
 export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
   const actor = data.adminActor;
+  const requestId = data.requestId ?? crypto.randomUUID();
   if (!actor) {
     return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   }
@@ -150,6 +152,23 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
   }
 
   await env.VFC_SUBMISSIONS.put(key, JSON.stringify(updated));
+
+  const auditedFields = ([
+    "name", "city", "role", "whatsapp", "referralSource", "referralName",
+    "invitationStatus", "assigned_to", "admin_notes",
+  ] as AuditedField[]).filter((field) => JSON.stringify(current[field as keyof Submission]) !== JSON.stringify(updated[field as keyof Submission]));
+  await auditMutation(env.VFC_SUBMISSIONS, {
+    timestamp: now,
+    actor,
+    action: "submission.update",
+    recordType: "submission",
+    recordId: id,
+    requestId,
+    changes: {
+      fields: auditedFields,
+      ...(currentStatus !== nextStatus ? { oldStatus: currentStatus, newStatus: nextStatus } : {}),
+    },
+  });
 
   return Response.json(
     { success: true, submission: updated },

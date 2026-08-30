@@ -1,3 +1,5 @@
+import type { RequestData } from "../observability";
+
 export interface AdminAuthEnv {
   CF_ACCESS_TEAM_DOMAIN?: string;
   CF_ACCESS_AUDIENCE?: string;
@@ -7,7 +9,7 @@ export interface AdminAuthEnv {
   ADMIN_MUTATIONS_ENABLED?: string;
 }
 
-export interface AdminAuthData {
+export interface AdminAuthData extends RequestData {
   adminActor?: string;
 }
 

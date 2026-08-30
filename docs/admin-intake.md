@@ -36,6 +36,6 @@ No bulk export is exposed. Export remains blocked until an owner approves purpos
 
 ## Remaining gates
 
-- Issue #12: immutable/transactional mutation history, request correlation, concurrent-write protection, backup/restore, alerting, and approved RPO/RTO.
+- Issues #12/#31: request correlation, PII-safe runtime logging, and attributable PII-minimized KV audit records are implemented. KV history is neither immutable nor atomic with business writes; concurrent-write protection, transactional history, backup/restore, alert configuration, and approved RPO/RTO remain open. See [Recovery and observability](recovery-observability.md).
 - Issue #30: monitored privacy channel, owners, identity verification, retention schedule, escalation, and a non-author synthetic lifecycle drill.
 - Staging: validate pagination, each allowed/rejected transition, correction, assignment/notes, retryable deletion, and denied mutations with synthetic records behind every authorized host. Production data must not be used for this validation.

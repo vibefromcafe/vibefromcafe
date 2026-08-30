@@ -7,6 +7,7 @@ import {
   rejectUnknownFields,
 } from "../../form-protection";
 import type { AdminAuthData } from "../auth";
+import { auditMutation, type AuditedField } from "../../observability";
 import {
   INQUIRY_STATUS_FLOW,
   optionalPatchText,
@@ -19,6 +20,7 @@ interface Env {
 
 export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ request, env, params, data }) => {
   const actor = data.adminActor;
+  const requestId = data.requestId ?? crypto.randomUUID();
   if (!actor) return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   const id = typeof params.id === "string" ? params.id.trim() : "";
   if (!/^[a-z0-9_-]{1,128}$/i.test(id)) return Response.json({ error: "Invalid inquiry id" }, { status: 400 });
@@ -78,6 +80,21 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
     updated_at: now,
   };
   await env.VFC_SUBMISSIONS.put(key, JSON.stringify(updated));
+  const auditedFields = ([
+    "name", "contact", "message", "status", "assigned_to", "admin_notes",
+  ] as AuditedField[]).filter((field) => JSON.stringify(current[field as keyof ProjectInquiry]) !== JSON.stringify(updated[field as keyof ProjectInquiry]));
+  await auditMutation(env.VFC_SUBMISSIONS, {
+    timestamp: now,
+    actor,
+    action: "inquiry.update",
+    recordType: "inquiry",
+    recordId: id,
+    requestId,
+    changes: {
+      fields: auditedFields,
+      ...(currentStatus !== nextStatus ? { oldStatus: currentStatus, newStatus: nextStatus } : {}),
+    },
+  });
   return Response.json(
     { success: true, inquiry: updated },
     { headers: { "cache-control": "no-store" } },

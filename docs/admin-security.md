@@ -159,6 +159,6 @@ For each inventoried hostname and route:
 
 Capture only host labels, route templates, status codes, timestamps, and pass/fail results. Redact login redirect query strings because they can contain transient signed metadata.
 
-## Ownership boundary with issue #12
+## Ownership boundary with issues #12/#31
 
-Issue #5 records the validated Access actor on each mutated resource or event tombstone. Issue #12 remains responsible for immutable mutation history, request IDs, old/new state, concurrent-write safety, retention, backup/restore, alerting, and structured PII-safe logging. Do not duplicate that audit system in this security gate.
+Issue #5 verifies the Access actor. Repository issue #31 work now correlates API requests, emits structured PII-safe logs, and appends actor/request/status/changed-field-name history after successful admin mutations. The history is application-append-only but not immutable or atomic with its business write. Issue #12 remains responsible for transactional history, concurrent-write safety, approved retention/RPO/RTO, backup/restore, and deployed alert evidence. See [Recovery and observability](recovery-observability.md); do not misrepresent KV audit records as the completed transactional system.

@@ -49,7 +49,7 @@ They require a verified Access actor and `ADMIN_MUTATIONS_ENABLED=true`. A delet
 4. removes the operational records, owned dedupe markers, and reverse references;
 5. replaces pending state with a submitted-field-free pseudonymous completion receipt.
 
-The route persists pending state before deleting data. A later partial failure returns `503` and retains that pending state so the operation can be retried; failure to persist the initial pending state also returns `503` before deletion begins. A completed retry is idempotent and checks whether the target was restored before returning success. Logs contain only the static event name and `privacy` category. Never claim completion from the HTTP response alone: in the authorized staging drill, inspect redacted key-class counts and confirm the pending receipt became `complete` without publishing IDs or hashes.
+The route persists pending state before deleting data. A later partial failure returns `503` and retains that pending state so the operation can be retried; failure to persist the initial pending state also returns `503` before deletion begins. A completed retry is idempotent and checks whether the target was restored before returning success. Runtime logs contain only allowlisted operational facts and a request ID; the separate protected audit record contains the actor, request ID, pseudonymous record ID, and action but no submitted values. Never claim completion from the HTTP response alone: in the authorized staging drill, inspect redacted key-class counts and confirm the pending receipt became `complete` without publishing IDs or hashes.
 
 KV listing is eventually consistent, so the repository cannot prove that a racing write, stale replica, or backup copy was removed. Freeze synthetic test writes during the final reconciliation, inspect all live key classes, and reconcile backups under the separately approved backup procedure. If strict concurrent deletion/claim semantics are required, move that coordination into the approved Durable Object design rather than claiming KV atomicity.
 
@@ -76,6 +76,6 @@ Do not perform the drill with real data, Production writes, or unapproved Cloudf
 
 ## Logging and incidents
 
-Application events must use static event/category fields only. Never log submitted fields, raw IP addresses, HMAC inputs/outputs, KV keys, record IDs, Turnstile tokens, site/secret keys, Access tokens/audiences, invitation URLs, or raw exceptions.
+Application events use an allowlisted structured shape and safe UUID request IDs. Never put submitted fields, raw IP addresses, HMAC inputs/outputs, KV keys, record IDs, Turnstile tokens, site/secret keys, Access tokens/audiences, invitation URLs, request/response bodies, or raw exceptions in runtime logs. Protected KV audit records are a different data class: they contain pseudonymous record IDs and verified actors for accountability but never submitted values. Apply the separately approved retention and access policy to both data classes.
 
 If exposure is suspected, stop public writes, preserve PII-free evidence, notify the approved escalation owner, rotate affected secret/key versions with an overlap window where safe, review Access and environment isolation, reconcile live and backup copies, and make any notification decision under the approved incident policy.

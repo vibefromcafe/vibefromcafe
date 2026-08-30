@@ -4,6 +4,7 @@ import {
   type PublicFormRecordKind,
 } from "../../../privacy-records";
 import type { FormProtectionEnv } from "../../../form-protection";
+import { auditMutation } from "../../../observability";
 
 function parseKind(value: string | string[] | undefined): PublicFormRecordKind | null {
   return value === "submission" || value === "inquiry" ? value : null;
@@ -31,6 +32,16 @@ export const onRequestDelete: PagesFunction<FormProtectionEnv, "kind" | "id", Ad
       { status: result.status },
     );
   }
+
+  await auditMutation(env.VFC_SUBMISSIONS, {
+    timestamp: new Date().toISOString(),
+    actor: data.adminActor,
+    action: "privacy.delete",
+    recordType: kind,
+    recordId: id,
+    requestId: data.requestId ?? crypto.randomUUID(),
+    changes: {},
+  });
 
   return Response.json({ success: true });
 };

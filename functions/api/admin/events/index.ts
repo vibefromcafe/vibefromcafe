@@ -2,6 +2,7 @@ import { parseEventInput } from "../../../../app/data/event-validation";
 import { getAllEvents, getEventById, saveEvent } from "../../../../app/data/events-store";
 import type { Event } from "../../../../app/data/types";
 import type { AdminAuthData } from "../auth";
+import { auditMutation } from "../../observability";
 
 interface Env {
   VFC_SUBMISSIONS: KVNamespace;
@@ -14,6 +15,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
 
 export const onRequestPost: PagesFunction<Env, string, AdminAuthData> = async ({ request, env, data }) => {
   const actor = data.adminActor;
+  const requestId = data.requestId ?? crypto.randomUUID();
   if (!actor) {
     return Response.json({ error: "Authenticated admin identity missing" }, { status: 500 });
   }
@@ -58,6 +60,16 @@ export const onRequestPost: PagesFunction<Env, string, AdminAuthData> = async ({
   };
 
   await saveEvent(env, event, actor);
+
+  await auditMutation(env.VFC_SUBMISSIONS, {
+    timestamp: new Date().toISOString(),
+    actor,
+    action: "event.create",
+    recordType: "event",
+    recordId: event.id,
+    requestId,
+    changes: { newStatus: event.status },
+  }, 201);
 
   return Response.json({ event }, { status: 201 });
 };

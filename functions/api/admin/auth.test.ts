@@ -286,6 +286,31 @@ describe("Cloudflare Access admin authentication", () => {
 });
 
 describe("admin route middleware", () => {
+  it("correlates authentication failures without logging token contents", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const response = await apiAdminMiddleware({
+      request: new Request("https://example.com/api/admin/events", {
+        headers: {
+          "Cf-Access-Jwt-Assertion": "private.invalid.token",
+          "X-Request-Id": "123e4567-e89b-42d3-a456-426614174000",
+        },
+      }),
+      env: environment(),
+      params: {},
+      data: {},
+      next: vi.fn(async () => new Response("unexpected")),
+      waitUntil: vi.fn(),
+      functionPath: "/api/admin/events",
+    });
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("X-Request-Id")).toBe("123e4567-e89b-42d3-a456-426614174000");
+    const output = String(warn.mock.calls[0][0]);
+    expect(output).toContain("admin_auth_failed");
+    expect(output).toContain("123e4567-e89b-42d3-a456-426614174000");
+    expect(output).not.toContain("private.invalid.token");
+  });
+
   it.each([
     ["page", adminPageMiddleware, "https://example.com/admin/events"],
     ["api", apiAdminMiddleware, "https://example.com/api/admin/events"],

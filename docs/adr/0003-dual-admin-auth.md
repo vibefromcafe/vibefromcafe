@@ -25,6 +25,6 @@ Admin writes additionally require `ADMIN_MUTATIONS_ENABLED=true`. It is enabled 
 ## Consequences
 - A missing assertion receives `401`; an invalid assertion receives `403`, independent of hostname.
 - Production administrators use their Access identity without a browser-managed shared credential.
-- Identity from the validated token is attached to event, tombstone, and submission mutations. Immutable old/new-state audit history, request correlation, and PII-safe mutation logging remain owned by issue #12.
+- Identity from the validated token is attached to mutations and their PII-minimized KV audit records. API request correlation and PII-safe mutation logging are implemented, but KV history is not immutable or atomic with the business write. Transactional history and concurrent-write safety remain owned by issue #12.
 - Local or emergency secret use requires deliberate runtime configuration and a non-browser client.
 - Access, Pages variables, and Preview/Production KV bindings must still be configured correctly in Cloudflare; in-app validation is defense in depth, not a replacement for the edge policy.
