@@ -50,7 +50,9 @@ export const onRequestPost: PagesFunction<Env, string, AdminAuthData> = async ({
     cafeId: parsed.input.cafeId,
     imageUrl: parsed.input.imageUrl,
     mapUrl: parsed.input.mapUrl,
-    status: parsed.input.status ?? "published",
+    detailsUrl: parsed.input.detailsUrl,
+    registrationUrl: parsed.input.registrationUrl,
+    status: parsed.input.status ?? "draft",
     tags: parsed.input.tags ?? [],
     createdAt: new Date().toISOString(),
   };

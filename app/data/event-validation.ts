@@ -10,6 +10,8 @@ export type EventInput = {
   cafeId?: string;
   imageUrl?: string;
   mapUrl?: string;
+  detailsUrl?: string;
+  registrationUrl?: string;
   status?: EventStatus;
   tags?: string[];
 };
@@ -40,6 +42,15 @@ function asTags(value: unknown) {
   return [];
 }
 
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function parseEventInput(body: unknown, requireBaseFields: boolean) {
   if (!body || typeof body !== "object") {
     return { error: "Invalid event payload" };
@@ -56,12 +67,24 @@ export function parseEventInput(body: unknown, requireBaseFields: boolean) {
     cafeId: asOptionalString(record.cafeId),
     imageUrl: asOptionalString(record.imageUrl),
     mapUrl: asOptionalString(record.mapUrl),
-    status: record.status === "draft" ? "draft" : "published",
+    detailsUrl: asOptionalString(record.detailsUrl),
+    registrationUrl: asOptionalString(record.registrationUrl),
+    status: record.status === "draft" || record.status === "published" ? record.status : undefined,
     tags: asTags(record.tags),
   };
 
+  if (record.status !== undefined && input.status === undefined) {
+    return { error: "status must be draft or published" };
+  }
+
   if (requireBaseFields && (!input.title || !input.description || !input.date || !input.time || !input.location)) {
     return { error: "title, description, date, time, and location are required" };
+  }
+
+  const invalidUrlField = (["imageUrl", "mapUrl", "detailsUrl", "registrationUrl"] as const)
+    .find((field) => input[field] && !isHttpUrl(input[field]));
+  if (invalidUrlField) {
+    return { error: `${invalidUrlField} must be an http or https URL` };
   }
 
   return { input };

@@ -5,8 +5,12 @@ interface Env {
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
-  const events = await getAllEvents(env);
-  return Response.json({
-    events: events.filter((event) => event.status === "published"),
-  });
+  try {
+    const events = await getAllEvents(env);
+    return Response.json({
+      events: events.filter((event) => event.status === "published"),
+    });
+  } catch {
+    return Response.json({ error: "Failed to load events" }, { status: 500 });
+  }
 };

@@ -25,7 +25,7 @@ export default function AdminNewEventPage() {
   return (
     <AdminFrame title="New event." intro="Create a community event record in the KV-backed event store.">
       {error ? <div className="mb-4 rounded-lg border border-red-400/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</div> : null}
-      <EventForm submitLabel="Create event" onSubmit={createEvent} />
+      <EventForm onSubmit={createEvent} />
     </AdminFrame>
   );
 }

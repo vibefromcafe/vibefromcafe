@@ -11,7 +11,9 @@ const EVENT_DELETED_PREFIX = "event-deleted:";
 function normalizeEventStatus(event: Event): Event {
   return {
     ...event,
-    status: event.status === "draft" ? "draft" : "published",
+    // Historical records may predate strict status validation. Fail closed so an
+    // unknown or missing value can never become public by accident.
+    status: event.status === "published" ? "published" : "draft",
   };
 }
 

@@ -31,6 +31,8 @@ export interface Event {
   cafeId?: string;
   imageUrl?: string;
   mapUrl?: string;
+  detailsUrl?: string;
+  registrationUrl?: string;
   status: EventStatus;
   tags: string[];
   createdAt: string;

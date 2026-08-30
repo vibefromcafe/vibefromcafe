@@ -26,8 +26,13 @@ export default function AdminEventsPage() {
     }
   }, []);
 
-  async function deleteEvent(id: string) {
-    const response = await fetch(`/api/admin/events/${encodeURIComponent(id)}`, {
+  async function deleteEvent(event: Event) {
+    if (!window.confirm(`Delete “${event.title}”? This removes it from the public archive and cannot be undone from the admin UI.`)) {
+      return;
+    }
+
+    setError(null);
+    const response = await fetch(`/api/admin/events/${encodeURIComponent(event.id)}`, {
       method: "DELETE",
     });
     if (!response.ok) {
@@ -50,8 +55,9 @@ export default function AdminEventsPage() {
       </div>
       {error ? <div className="mb-4 rounded-lg border border-red-400/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</div> : null}
       <div className="space-y-4">
+        {loading ? <div className="dark-card text-white/50" role="status">Loading events...</div> : null}
         {events.length === 0 && !loading ? <div className="dark-card text-white/50">No events yet.</div> : null}
-        {events.map((event) => (
+        {!loading && events.map((event) => (
           <article key={event.id} className="dark-card">
             <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
               <div>
@@ -61,7 +67,7 @@ export default function AdminEventsPage() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <Link className="button button-ghost" to={`/admin/events/${event.id}/edit`}>Edit</Link>
-                <button className="button border border-red-400/40 text-red-200" type="button" onClick={() => void deleteEvent(event.id)}>Delete</button>
+                <button className="button border border-red-400/40 text-red-200" type="button" onClick={() => void deleteEvent(event)}>Delete</button>
               </div>
             </div>
           </article>

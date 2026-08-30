@@ -11,6 +11,8 @@ export type EventFormValue = {
   cafeId: string;
   imageUrl: string;
   mapUrl: string;
+  detailsUrl: string;
+  registrationUrl: string;
   status: Event["status"];
   tags: string;
 };
@@ -26,12 +28,14 @@ export function toEventFormValue(event?: Event): EventFormValue {
     cafeId: event?.cafeId ?? "",
     imageUrl: event?.imageUrl ?? "",
     mapUrl: event?.mapUrl ?? "",
-    status: event?.status ?? "published",
+    detailsUrl: event?.detailsUrl ?? "",
+    registrationUrl: event?.registrationUrl ?? "",
+    status: event?.status ?? "draft",
     tags: event?.tags.join(", ") ?? "",
   };
 }
 
-export function EventForm({ initialValue, submitLabel, onSubmit }: { initialValue?: Event; submitLabel: string; onSubmit: (value: EventFormValue) => Promise<void> }) {
+export function EventForm({ initialValue, onSubmit }: { initialValue?: Event; onSubmit: (value: EventFormValue) => Promise<void> }) {
   const [form, setForm] = useState<EventFormValue>(() => toEventFormValue(initialValue));
   const [loading, setLoading] = useState(false);
 
@@ -41,9 +45,13 @@ export function EventForm({ initialValue, submitLabel, onSubmit }: { initialValu
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const status = submitter?.value;
+    if (status !== "draft" && status !== "published") return;
+
     setLoading(true);
     try {
-      await onSubmit(form);
+      await onSubmit({ ...form, status });
     } finally {
       setLoading(false);
     }
@@ -62,11 +70,18 @@ export function EventForm({ initialValue, submitLabel, onSubmit }: { initialValu
       <label className="form-field">Cafe ID<input value={form.cafeId} onChange={(event) => updateField("cafeId", event.target.value)} /></label>
       <label className="form-field">Image URL<input value={form.imageUrl} onChange={(event) => updateField("imageUrl", event.target.value)} /></label>
       <label className="form-field">Map URL<input value={form.mapUrl} onChange={(event) => updateField("mapUrl", event.target.value)} /></label>
+      <label className="form-field">Details URL<input value={form.detailsUrl} onChange={(event) => updateField("detailsUrl", event.target.value)} /></label>
+      <label className="form-field">Registration URL<input value={form.registrationUrl} onChange={(event) => updateField("registrationUrl", event.target.value)} /></label>
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="form-field">Status<select value={form.status} onChange={(event) => updateField("status", event.target.value as Event["status"])}><option value="published">published</option><option value="draft">draft</option></select></label>
         <label className="form-field">Tags<input value={form.tags} onChange={(event) => updateField("tags", event.target.value)} placeholder="tag, another tag" /></label>
       </div>
-      <button className="button bg-yellow text-midnight" type="submit" disabled={loading}>{loading ? "Saving..." : submitLabel}</button>
+      <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/60">
+        Current status: <strong className="text-white">{form.status}</strong>. Saving as a draft keeps the event off the public page. Publishing makes it public immediately.
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <button className="button button-ghost" type="submit" name="status" value="draft" disabled={loading}>{loading ? "Saving..." : "Save as draft"}</button>
+        <button className="button bg-yellow text-midnight" type="submit" name="status" value="published" disabled={loading}>{loading ? "Saving..." : "Publish event"}</button>
+      </div>
     </form>
   );
 }

@@ -64,6 +64,8 @@ export const onRequestPatch: PagesFunction<Env, "id", AdminAuthData> = async ({ 
     cafeId: parsed.input.cafeId,
     imageUrl: parsed.input.imageUrl,
     mapUrl: parsed.input.mapUrl,
+    detailsUrl: parsed.input.detailsUrl,
+    registrationUrl: parsed.input.registrationUrl,
     status: parsed.input.status ?? existing.status,
     tags: parsed.input.tags ?? existing.tags,
   };
