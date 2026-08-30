@@ -5,6 +5,7 @@ import jogjaSource from "../routes/chapters.jogja.tsx?raw";
 import {
   heroProofPoints,
   publicChapters,
+  publicMemberCount,
   publicProductExamples,
 } from "./public-claims";
 import claimsSource from "./public-claims.ts?raw";
@@ -69,6 +70,11 @@ describe("canonical public claims", () => {
     }
   });
 
+  it("uses the conservative owner-confirmed community member claim", () => {
+    expect(publicMemberCount).toBe("350+ members");
+    expect(claimsSource).not.toContain("400+ members");
+  });
+
   it("keeps the homepage proof points to accepted qualitative or chapter facts", () => {
     expect(heroProofPoints).toEqual([
       "People learning AI across roles",
@@ -92,8 +98,9 @@ describe("claim-owned public surfaces", () => {
       for (const claim of forbiddenClaims) {
         expect(source, `${path} contains ${claim}`).not.toContain(claim);
       }
+      const sourceWithoutAcceptedMemberClaim = source.replaceAll(publicMemberCount, "");
       for (const pattern of forbiddenClaimPatterns) {
-        expect(source, `${path} matches ${pattern}`).not.toMatch(pattern);
+        expect(sourceWithoutAcceptedMemberClaim, `${path} matches ${pattern}`).not.toMatch(pattern);
       }
     }
   });

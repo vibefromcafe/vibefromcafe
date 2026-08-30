@@ -11,6 +11,9 @@ export type PublicChapter = {
   };
 };
 
+/** Conservative public wording for the owner-confirmed 369-member count. */
+export const publicMemberCount = "350+ members";
+
 /**
  * The complete, owner-confirmed active chapter list.
  * See docs/claims-source-of-truth.md before changing this list or adding numbers.

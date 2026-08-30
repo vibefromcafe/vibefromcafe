@@ -13,7 +13,7 @@ The repository has owner confirmation that these are the complete active chapter
 - Kuala Lumpur
 - Bandung
 
-That confirmation was supplied for this implementation on 2026-08-30. Operational evidence and private community data are intentionally not stored in the repository. No public member totals were confirmed.
+That confirmation was supplied for this implementation on 2026-08-30. Operational evidence and private community data are intentionally not stored in the repository. The owner separately confirmed 369 community members on the same date, authorizing the conservative public claim `350+ members`; no chapter-level member totals were confirmed.
 
 Jogja has an existing public page at `/chapters/jogja`. No better public chapter-specific destination was evidenced for the other four chapters, so their cards use the generic `/join` action.
 
@@ -23,7 +23,7 @@ The existing site and ADR 0002 evidence cafein.id as the public cafe-discovery d
 
 | Prior claim | Disposition |
 | --- | --- |
-| `400+` community members | Removed; no dated, owned roster snapshot. |
+| `400+` community members | Replaced with the owner-confirmed conservative public floor `350+ members` for an exact count of 369 as of 2026-08-30. |
 | Individual chapter member totals | Removed; no dated, owned roster snapshots. |
 | `4,000+` cafes indexed | Removed; not supported as a VFC figure. |
 | Product deployment, availability, or customer implications | Removed. Named cards are explicitly service examples. |
@@ -38,7 +38,7 @@ The `/join`, `/contact`, and `/events` routes and their forms/APIs were explicit
 ## Human content decisions still needed
 
 1. Name the human owner and review cadence for the claims register.
-2. Decide whether member totals should ever be public; if yes, provide definitions and dated, privacy-safe snapshots.
+2. Reconfirm the community member total by 2026-11-30 before increasing or retaining the public floor.
 3. Provide public chapter-specific destinations for Jabodetabek, Surabaya–Malang, Kuala Lumpur, and Bandung if they should replace `/join`.
 4. Provide public demos or permissioned case studies before promoting any service example to a product or customer claim.
 5. Confirm whether any cafein.id metrics may be co-marketed by VFC.

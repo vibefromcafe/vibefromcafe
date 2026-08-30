@@ -24,6 +24,14 @@ Public claims used by the homepage and chapter routes are defined in `app/data/p
 
 The five rows above are one accepted aggregate fact: **five active local chapters**. They do not authorize member counts or imply chapter-specific public invite links.
 
+## Community register
+
+| Claim ID | Public text | Definition | Source | As of | Owner | Review by | Status | Surfaces |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| COM-MEMBERS | `350+ members` | Conservative public floor for 369 community members | Owner confirmation supplied for issue #7 | 2026-08-30 | owner name pending | 2026-11-30 | accepted | `/join` |
+
+The exact count is retained as dated evidence for the conservative public floor; it is not a chapter-specific count.
+
 ## Product register
 
 | ID | Public name | Classification | Evidence | Status |
