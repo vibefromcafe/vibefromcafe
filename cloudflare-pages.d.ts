@@ -44,3 +44,14 @@ interface KVNamespace {
   }): Promise<KVNamespaceListResult<Metadata>>;
   delete(key: string): Promise<void>;
 }
+
+interface DurableObjectId {}
+
+interface DurableObjectStub {
+  fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+}
+
+interface DurableObjectNamespace {
+  idFromName(name: string): DurableObjectId;
+  get(id: DurableObjectId): DurableObjectStub;
+}

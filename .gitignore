@@ -4,6 +4,8 @@ build/
 .react-router/
 .pnpm-store/
 .wrangler/
+.dev.vars*
+.env*
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

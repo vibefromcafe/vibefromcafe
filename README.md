@@ -50,6 +50,7 @@ Admin routes:
 - `/admin/events`
 - `/admin/events/new`
 - `/admin/events/:id/edit`
+- `/admin/health`
 
 ## Data Model
 
@@ -59,6 +60,9 @@ Key prefixes:
 
 - `submission:{id}` for community join submissions
 - `inquiry:{id}` for project inquiries
+- `form-dedupe:{form}:{version}:{hmac}` for short-lived keyed duplicate markers
+- `privacy-dedupe-ref:{form}:{id}` for deletion references/metadata that contain no submitted fields
+- `privacy-deletion:{kind}:{id}` for resumable, expiring deletion receipts
 - `event:{id}` for event overrides and custom events
 - `event-deleted:{id}` for seed event deletion markers
 
@@ -85,11 +89,29 @@ Variables:
 ```toml
 [vars]
 WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe From Cafe. Gabung untuk diskusi, sesi, hands-on building, webinar, podcast, dan dukungan karier: {{group_link}}"
+PUBLIC_FORM_DEDUPE_KEY_VERSION = "v1"
 ```
 
 This is the repository default. The value available to a deployed Function comes from that Pages deployment's runtime configuration and may differ from the repository, including an older or environment-specific override. Before cutover, an owner must verify `WHATSAPP_INVITE_MESSAGE_TEMPLATE` in both preview and production Cloudflare Pages environments without copying private invite URLs or secrets into the repository or PR.
 
-Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests.
+Public forms additionally require environment-specific runtime configuration:
+
+- `TURNSTILE_SITE_KEY` and the encrypted `TURNSTILE_SECRET_KEY` must be configured together or both absent. The browser reads the public site key from `/api/public-form-config`; there is no build-time `VITE_*` key, so Health and the rendered widget inspect the same deployed runtime configuration.
+- encrypted `PUBLIC_FORM_DEDUPE_KEY` must contain at least 32 bytes and match `PUBLIC_FORM_DEDUPE_KEY_VERSION`. During rotation, configure both `PUBLIC_FORM_DEDUPE_PREVIOUS_KEY` and `PUBLIC_FORM_DEDUPE_PREVIOUS_KEY_VERSION`; remove them only after the accepted marker window.
+- `PRIVACY_REQUEST_URL` must be the operator-approved, monitored public HTTPS or `mailto:` request channel. The forms fail closed when it is absent or invalid. The repository does not choose that channel, its owners, or a response target.
+- `PUBLIC_FORM_RATE_LIMITER` must be a binding to an external, strongly consistent Durable Object implementation of the contract below.
+
+Do not put secrets in `wrangler.toml`, build variables, fixtures, logs, tickets, or command output. Use encrypted Pages secrets and environment-isolated credentials.
+
+### Atomic rate-limiter deployment gate
+
+Cloudflare Pages Functions do not support the Workers Rate Limiting binding. That Workers API is also permissive, eventually consistent, and scoped per Cloudflare location, so it cannot satisfy the strict concurrent/multi-PoP requirement. KV read/modify/write counters are non-atomic and must not be used.
+
+Pages can bind an external Durable Object, but cannot create or deploy one. An authorized owner must approve and provision a separate Worker/Durable Object, then add a Pages Durable Object binding named `PUBLIC_FORM_RATE_LIMITER`. Its single object named `public-form-rate-limit-v1` must atomically enforce policy `public-form-v1`: no more than 5 allowed attempts per endpoint for one HMAC-derived client key in any rolling 60-second interval. `POST /limit` receives only `{ key, policy }` and must return JSON `{ "allowed": boolean }`. The client key uses only Cloudflare's trusted `CF-Connecting-IP` header; it never falls back to caller-controlled forwarding headers. Missing bindings, missing client IP, exceptions, non-2xx responses, and malformed responses fail closed with `503`; exhausted limits return `429`.
+
+The exact external Worker script name, Durable Object class, namespace/migration, cost acceptance, and Preview/Production bindings are intentionally not present in this repository because they require the unresolved operator/resource decision in issue #27. Do not add placeholder `[[durable_objects.bindings]]` configuration and call it deployed. Before enabling writes, retain redacted evidence that at least 100 concurrent requests near rolling-window edges and multi-PoP traffic stay within the approved tolerance for both endpoints.
+
+Admin pages and APIs validate Cloudflare Access identity tokens in the application as well as relying on the edge policy. Protected `/admin/health` and `/api/admin/security` report status and blockers without values. See [Admin security operations](docs/admin-security.md) for required Access applications, runtime variables, isolated Preview bindings, and smoke tests, and [Privacy operations](docs/privacy-operations.md) for the repository deletion workflow and remaining operator gates.
 
 ## Development
 

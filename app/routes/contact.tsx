@@ -1,31 +1,51 @@
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import { ArrowRight, BrainCircuit, Check, Workflow } from "lucide-react";
+import { usePublicFormConfig } from "../components/PublicFormConfig";
 import { PageFrame } from "../components/SiteChrome";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 
 type InquiryForm = {
   name: string;
   contact: string;
   message: string;
+  privacyConsent: boolean;
 };
 
 const initialForm: InquiryForm = {
   name: "",
   contact: "",
   message: "",
+  privacyConsent: false,
 };
 
 export default function ContactPage() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileAttempt, setTurnstileAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const publicForm = usePublicFormConfig();
 
   function updateField<K extends keyof InquiryForm>(key: K, value: InquiryForm[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((previous) => ({ ...previous, [key]: value }));
   }
+
+  const handleTurnstileError = useCallback(() => {
+    setError("Verification is temporarily unavailable. Please try again.");
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!publicForm.config) {
+      setError(publicForm.error ?? "Please wait while form protection loads.");
+      return;
+    }
+    if (publicForm.config.turnstileSiteKey && !turnstileToken) {
+      setError("Please complete the verification before submitting.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -33,15 +53,15 @@ export default function ContactPage() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       const data = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        throw new Error(data.error ?? "Something went wrong");
-      }
+      if (!response.ok) throw new Error(data.error ?? "Something went wrong");
       setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Something went wrong. Please try again.");
+      setTurnstileToken("");
+      setTurnstileAttempt((attempt) => attempt + 1);
     } finally {
       setLoading(false);
     }
@@ -58,11 +78,30 @@ export default function ContactPage() {
             </div>
           ) : (
             <form className="space-y-5" onSubmit={submit}>
-              <label className="form-field">Name<input required value={form.name} onChange={(event) => updateField("name", event.target.value)} placeholder="Your name" /></label>
-              <label className="form-field">Contact<input required value={form.contact} onChange={(event) => updateField("contact", event.target.value)} placeholder="Email or WhatsApp number" /></label>
-              <label className="form-field">Message<textarea required rows={6} value={form.message} onChange={(event) => updateField("message", event.target.value)} placeholder="What problem should this AI project solve?" /></label>
+              <label className="form-field">Name<input required maxLength={100} value={form.name} onChange={(event) => updateField("name", event.target.value)} placeholder="Your name" /></label>
+              <label className="form-field">Contact<input required maxLength={254} value={form.contact} onChange={(event) => updateField("contact", event.target.value)} placeholder="Email or WhatsApp number" /></label>
+              <label className="form-field">Message<textarea required maxLength={2000} rows={6} value={form.message} onChange={(event) => updateField("message", event.target.value)} placeholder="What problem should this AI project solve?" /></label>
+
+              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/55">
+                We use your contact details and message only to respond to this project inquiry. Authorized VFC admins can review them. {publicForm.config ? <a className="text-yellow underline underline-offset-4" href={publicForm.config.privacyRequestUrl}>Request access, correction, or deletion.</a> : null}
+              </div>
+              <label className="flex items-start gap-3 text-sm leading-6 text-white/65">
+                <input required className="mt-1 size-4" type="checkbox" checked={form.privacyConsent} onChange={(event) => updateField("privacyConsent", event.target.checked)} />
+                <span>I agree that VFC may use my contact details and message to respond to this project inquiry.</span>
+              </label>
+              {publicForm.config?.turnstileSiteKey ? (
+                <TurnstileWidget
+                  key={turnstileAttempt}
+                  siteKey={publicForm.config.turnstileSiteKey}
+                  action="contact"
+                  onToken={setTurnstileToken}
+                  onError={handleTurnstileError}
+                />
+              ) : null}
+              {publicForm.loading ? <p className="text-sm text-white/45">Loading form protection...</p> : null}
+              {publicForm.error ? <p className="text-sm text-red-300">{publicForm.error}</p> : null}
               {error ? <p className="text-sm text-red-300">{error}</p> : null}
-              <button className="button bg-yellow text-midnight" type="submit" disabled={loading}>{loading ? "Sending..." : "Send inquiry"} <ArrowRight size={16} /></button>
+              <button className="button bg-yellow text-midnight" type="submit" disabled={loading || !publicForm.config}>{loading ? "Sending..." : "Send inquiry"} <ArrowRight size={16} /></button>
             </form>
           )}
         </div>

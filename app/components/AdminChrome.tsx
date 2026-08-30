@@ -6,6 +6,7 @@ const adminMenu = [
   { label: "Submissions", to: "/admin", end: true },
   { label: "Inquiries", to: "/admin/inquiries" },
   { label: "Events", to: "/admin/events" },
+  { label: "Health", to: "/admin/health" },
 ];
 
 export function AdminFrame({ title, intro, children }: { title: string; intro: string; children: React.ReactNode }) {

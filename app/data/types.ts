@@ -60,6 +60,8 @@ export interface Submission {
   approved_at?: string;
   updated_by?: string;
   updated_at?: string;
+  privacyConsentAt?: string;
+  privacyConsentVersion?: string;
   createdAt: string;
 }
 
@@ -71,5 +73,7 @@ export interface ProjectInquiry {
   contact: string;
   message: string;
   status: InquiryStatus;
+  privacyConsentAt?: string;
+  privacyConsentVersion?: string;
   createdAt: string;
 }

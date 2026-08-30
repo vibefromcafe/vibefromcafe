@@ -112,6 +112,16 @@ function configuredAudiences(env: AdminAuthEnv) {
   return new Set(audiences);
 }
 
+export function getAdminAccessConfigurationStatus(env: AdminAuthEnv) {
+  const hasAny = Boolean(
+    env.CF_ACCESS_TEAM_DOMAIN?.trim() ||
+    env.CF_ACCESS_AUDIENCE?.trim() ||
+    env.CF_ACCESS_AUDIENCES?.trim(),
+  );
+  if (!hasAny) return "missing" as const;
+  return configuredIssuer(env) && configuredAudiences(env) ? "ready" as const : "invalid" as const;
+}
+
 function hasAudience(claim: unknown, expected: Set<string>) {
   if (typeof claim === "string") return expected.has(claim);
   return Array.isArray(claim) && claim.some((value) => typeof value === "string" && expected.has(value));

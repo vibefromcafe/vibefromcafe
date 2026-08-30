@@ -125,12 +125,17 @@ Build a private host list from the dashboard inventory. For every host, test all
 - `GET /api/admin/inquiries`
 - `GET /api/admin/events`
 - `GET /api/admin/events/<existing-id>`
+- `GET /api/admin/security`
 - `PATCH /api/admin/submissions/<test-id>`
 - `POST /api/admin/events`
 - `PATCH /api/admin/events/<test-id>`
 - `DELETE /api/admin/events/<test-id>`
+- `DELETE /api/admin/privacy/submission/<synthetic-id>`
+- `DELETE /api/admin/privacy/inquiry/<synthetic-id>`
 
 Use synthetic staging records for mutation tests; never print response bodies containing submissions, inquiries, tokens, or identities.
+
+The every-host page matrix must explicitly include `/admin/health`. The every-host API matrix must explicitly include `/api/admin/security` and verify it never returns configuration status to anonymous or forged-header requests. Privacy deletion routes are mutations: Preview must return `403` while `ADMIN_MUTATIONS_ENABLED` is disabled, and an authorized isolated drill must use only synthetic records.
 
 ### Before deployment (observed)
 

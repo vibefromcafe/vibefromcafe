@@ -1,108 +1,167 @@
 import { describe, expect, it, vi } from "vitest";
+import { PUBLIC_FORM_CONSENT_VERSION } from "../../app/data/public-forms";
+import {
+  MockAtomicRateLimiter,
+  MockKvNamespace,
+  dedupeReadBarrier,
+  joinPayload,
+  jsonRequest,
+  pagesContext,
+  protectedFormEnv,
+  rateLimiterNamespace,
+} from "../test-support/public-forms";
 import { onRequestPost } from "./join";
 
-class MockKvNamespace {
-  private readonly store = new Map<string, string>();
-
-  async get<T>(key: string, type?: "json") {
-    const value = this.store.get(key);
-    if (!value) return null;
-    return type === "json" ? JSON.parse(value) as T : value as T;
-  }
-
-  async put(key: string, value: string) {
-    this.store.set(key, value);
-  }
-
-  entries() {
-    return [...this.store.entries()];
-  }
-}
-
-function createContext({ request, env }: { request: Request; env: Record<string, unknown> }) {
-  return {
-    request,
-    env,
-    params: {},
-    data: {},
-    next: vi.fn(),
-    waitUntil: vi.fn(),
-    functionPath: "/api/join",
-  } as unknown as Parameters<typeof onRequestPost>[0];
+function submit(env: Record<string, unknown>, body = joinPayload(), headers: HeadersInit = {}) {
+  const request = jsonRequest("/api/join", body, headers);
+  return onRequestPost(pagesContext(onRequestPost, request, env));
 }
 
 describe("join api", () => {
-  it("stores successful submissions as invited when WhatsApp invite URL exists", async () => {
+  it("stores bounded consent data and returns only a generic accepted response", async () => {
     const kv = new MockKvNamespace();
-
-    const response = await onRequestPost(
-      createContext({
-        request: new Request("https://example.com/api/join", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            name: "Immediate Invite",
-            city: "Jogja",
-            role: "Developer",
-            whatsapp: "0812-3456-789",
-            referralSource: "instagram",
-          }),
-        }),
-        env: {
-          VFC_SUBMISSIONS: kv,
-          WHATSAPP_GROUP_INVITE_URL: "https://chat.whatsapp.com/vfc-group",
-          WHATSAPP_INVITE_MESSAGE_TEMPLATE: "Hi {{name}}, join {{group_link}}",
-        },
-      }),
-    );
-
-    const body = (await response.json()) as {
-      success: boolean;
-      submission: { id: string; invitationStatus: string };
-      whatsappInvite: { groupInviteUrl: string };
+    const env = {
+      ...protectedFormEnv(kv),
+      WHATSAPP_GROUP_INVITE_URL: "https://invite.example.invalid/private",
     };
-    const [[key, storedValue]] = kv.entries();
-    const stored = JSON.parse(storedValue) as { id: string; invitationStatus: string; invited_at?: string };
 
-    expect(response.status).toBe(200);
-    expect(body.success).toBe(true);
-    expect(body.submission).toEqual({ id: stored.id, invitationStatus: "invited" });
-    expect(body.whatsappInvite.groupInviteUrl).toBe("https://chat.whatsapp.com/vfc-group");
-    expect(key).toBe(`submission:${stored.id}`);
-    expect(stored.invitationStatus).toBe("invited");
-    expect(stored.invited_at).toBeTruthy();
+    const response = await submit(env);
+    const body = await response.json();
+    const [recordKey] = kv.keys("submission:");
+    const stored = JSON.parse(kv.store.get(recordKey)!) as {
+      invitationStatus: string;
+      privacyConsentAt?: string;
+      privacyConsentVersion?: string;
+    };
+
+    expect(response.status).toBe(202);
+    expect(body).toEqual({ success: true });
+    expect(JSON.stringify(body)).not.toContain("invite");
+    expect(stored).toMatchObject({
+      invitationStatus: "signed_up",
+      privacyConsentVersion: PUBLIC_FORM_CONSENT_VERSION,
+    });
+    expect(stored.privacyConsentAt).toBeTruthy();
+    expect(kv.keys("privacy-dedupe-ref:join:")).toHaveLength(1);
+    expect(kv.keys("form-dedupe:join:v1:")).toHaveLength(1);
+    expect([...kv.store.keys()].join("\n")).not.toContain("2025550100");
   });
 
-  it("keeps submissions signed_up when WhatsApp invite URL is missing", async () => {
+  it("returns byte-equivalent responses for a first and duplicate submission", async () => {
     const kv = new MockKvNamespace();
+    const env = protectedFormEnv(kv);
 
-    const response = await onRequestPost(
-      createContext({
-        request: new Request("https://example.com/api/join", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            name: "Missing Invite URL",
-            city: "Jogja",
-            role: "Developer",
-            whatsapp: "0812-3456-789",
-            referralSource: "instagram",
-          }),
-        }),
-        env: {
-          VFC_SUBMISSIONS: kv,
-          WHATSAPP_GROUP_INVITE_URL: "",
-        },
-      }),
-    );
+    const first = await submit(env);
+    const firstText = await first.text();
+    const duplicate = await submit(env, joinPayload({ name: "Another Synthetic Name" }));
 
-    const body = (await response.json()) as { submission: { invitationStatus: string } };
-    const [[, storedValue]] = kv.entries();
-    const stored = JSON.parse(storedValue) as { invitationStatus: string; invited_at?: string };
+    expect(duplicate.status).toBe(first.status);
+    expect(await duplicate.text()).toBe(firstText);
+    expect(kv.keys("submission:")).toHaveLength(1);
+  });
 
-    expect(response.status).toBe(200);
-    expect(body.submission.invitationStatus).toBe("signed_up");
-    expect(stored.invitationStatus).toBe("signed_up");
-    expect(stored.invited_at).toBeUndefined();
+  it.each([
+    ["unsupported enum", joinPayload({ referralSource: "unsupported" }), 400],
+    ["unknown field", joinPayload({ unexpected: true }), 400],
+    ["missing consent", joinPayload({ privacyConsent: false }), 400],
+    ["invalid phone", joinPayload({ whatsapp: "123" }), 400],
+    ["oversized field", joinPayload({ role: "x".repeat(281) }), 400],
+    ["irrelevant referral detail", joinPayload({ referralName: "not accepted" }), 400],
+    ["non-text verification token", joinPayload({ turnstileToken: 123 }), 400],
+    ["whitespace verification token", joinPayload({ turnstileToken: " " }), 400],
+    ["null optional detail", joinPayload({ referralName: null }), 400],
+  ])("rejects %s before KV writes", async (_name, body, status) => {
+    const kv = new MockKvNamespace();
+    const response = await submit(protectedFormEnv(kv), body);
+
+    expect(response.status).toBe(status);
+    expect(kv.store.size).toBe(0);
+  });
+
+  it("requires the exact JSON media type", async () => {
+    const kv = new MockKvNamespace();
+    const request = new Request("https://forms.example.invalid/api/join", {
+      method: "POST",
+      headers: { "content-type": "application/jsonp", "cf-connecting-ip": "192.0.2.10" },
+      body: JSON.stringify(joinPayload()),
+    });
+    const response = await onRequestPost(pagesContext(onRequestPost, request, protectedFormEnv(kv)));
+
+    expect(response.status).toBe(415);
+    expect(kv.store.size).toBe(0);
+  });
+
+  it("fails closed without the external atomic limiter and logs no submitted values", async () => {
+    const kv = new MockKvNamespace();
+    const payload = joinPayload();
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const env = protectedFormEnv(kv, { PUBLIC_FORM_RATE_LIMITER: undefined });
+
+    const response = await submit(env, payload);
+    const output = JSON.stringify(log.mock.calls);
+
+    expect(response.status).toBe(503);
+    expect(kv.store.size).toBe(0);
+    expect(output).toContain("atomic_rate_limiter_missing");
+    for (const value of Object.values(payload)) {
+      if (typeof value === "string" && value) expect(output).not.toContain(value);
+    }
+    expect(output).not.toContain("192.0.2.10");
+    log.mockRestore();
+  });
+
+  it("keeps the accepted record deletion-complete when the best-effort marker write fails", async () => {
+    const kv = new MockKvNamespace();
+    kv.failPut = (key) => key.startsWith("form-dedupe:");
+    const log = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    const response = await submit(protectedFormEnv(kv));
+
+    expect(response.status).toBe(202);
+    expect(kv.keys("submission:")).toHaveLength(1);
+    expect(kv.keys("privacy-dedupe-ref:join:")).toHaveLength(1);
+    expect(kv.keys("form-dedupe:")).toHaveLength(0);
+    expect(JSON.stringify(log.mock.calls)).toBe('[["{\\"event\\":\\"dedupe_marker_write_failed\\",\\"form\\":\\"join\\"}"]]');
+    log.mockRestore();
+  });
+
+  it("rolls back the reverse reference when the operational record write fails", async () => {
+    const kv = new MockKvNamespace();
+    kv.failPut = (key) => key.startsWith("submission:");
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const response = await submit(protectedFormEnv(kv));
+    const output = JSON.stringify(log.mock.calls);
+
+    expect(response.status).toBe(503);
+    expect(kv.keys("submission:")).toHaveLength(0);
+    expect(kv.keys("privacy-dedupe-ref:")).toHaveLength(0);
+    expect(kv.keys("form-dedupe:")).toHaveLength(0);
+    expect(output).toContain("operational_record_write_failed");
+    expect(output).not.toContain("2025550100");
+    log.mockRestore();
+  });
+
+  it("documents the KV race with twenty equivalent concurrent generic responses", async () => {
+    const requestCount = 20;
+    const kv = new MockKvNamespace();
+    kv.beforeGet = dedupeReadBarrier(requestCount);
+    const limiter = new MockAtomicRateLimiter(100);
+    const env = protectedFormEnv(kv, { PUBLIC_FORM_RATE_LIMITER: rateLimiterNamespace(limiter) });
+
+    const responses = await Promise.all(Array.from({ length: requestCount }, (_, index) => {
+      const request = jsonRequest("/api/join", joinPayload(), {
+        "cf-connecting-ip": `192.0.2.${index + 20}`,
+      });
+      return onRequestPost(pagesContext(onRequestPost, request, env));
+    }));
+    const bodies = await Promise.all(responses.map((response) => response.text()));
+
+    expect(new Set(responses.map((response) => response.status))).toEqual(new Set([202]));
+    expect(new Set(bodies).size).toBe(1);
+    expect(kv.keys("submission:")).toHaveLength(requestCount);
+    expect(kv.keys("privacy-dedupe-ref:join:")).toHaveLength(requestCount);
+    expect(kv.keys("form-dedupe:join:")).toHaveLength(1);
+    expect([...kv.store.keys()].join("\n")).not.toContain("2025550100");
   });
 });

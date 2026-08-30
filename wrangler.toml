@@ -4,6 +4,7 @@ pages_build_output_dir = "build/client"
 
 [vars]
 WHATSAPP_INVITE_MESSAGE_TEMPLATE = "Halo {{name}}! Selamat datang di Vibe From Cafe. Gabung untuk diskusi, sesi, hands-on building, webinar, podcast, dan dukungan karier: {{group_link}}"
+PUBLIC_FORM_DEDUPE_KEY_VERSION = "v1"
 
 [[kv_namespaces]]
 binding = "VFC_SUBMISSIONS"
