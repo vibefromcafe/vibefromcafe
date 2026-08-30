@@ -7,20 +7,33 @@ import {
 } from "react-router";
 import type { LinksFunction, MetaFunction } from "react-router";
 import "./app.css";
+import { absoluteSiteUrl, isAdminPath, isApiPath, publicCanonicalUrl } from "./seo";
 
 const SITE_TITLE = "Vibe From Cafe - AI Community";
 const SITE_DESCRIPTION =
   "Vibe From Cafe is an AI community for learning, sharing, and career growth through discussions, sessions, hands-on building, webinars, and podcasts, with an adjacent studio that helps businesses build useful AI.";
 
-export const meta: MetaFunction = () => [
-  { title: SITE_TITLE },
-  { name: "description", content: SITE_DESCRIPTION },
-  { property: "og:title", content: SITE_TITLE },
-  { property: "og:description", content: SITE_DESCRIPTION },
-  { property: "og:image", content: "/og-image.png" },
-  { property: "og:type", content: "website" },
-  { name: "twitter:card", content: "summary_large_image" },
-];
+export const meta: MetaFunction = ({ location }) => {
+  const canonicalUrl = publicCanonicalUrl(location.pathname);
+  const shouldNotIndex = !canonicalUrl || isAdminPath(location.pathname) || isApiPath(location.pathname);
+
+  return [
+    { title: SITE_TITLE },
+    { name: "description", content: SITE_DESCRIPTION },
+    { property: "og:title", content: SITE_TITLE },
+    { property: "og:description", content: SITE_DESCRIPTION },
+    { property: "og:image", content: absoluteSiteUrl("/og-image.png") },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+    ...(canonicalUrl
+      ? [
+          { tagName: "link", rel: "canonical", href: canonicalUrl },
+          { property: "og:url", content: canonicalUrl },
+        ]
+      : []),
+    ...(shouldNotIndex ? [{ name: "robots", content: "noindex, nofollow" }] : []),
+  ];
+};
 
 export const links: LinksFunction = () => [
   { rel: "icon", type: "image/png", href: "/favicon.png" },
