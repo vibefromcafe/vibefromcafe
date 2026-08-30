@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import {
   ArrowDownRight,
@@ -103,6 +103,49 @@ function BrandMark({ compact = false }: { compact?: boolean }) {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const menuButton = menuButtonRef.current
+    const menuLinks = Array.from(mobileMenuRef.current?.querySelectorAll<HTMLElement>('a[href]') ?? [])
+    const focusableElements = menuButton ? [menuButton, ...menuLinks] : menuLinks
+
+    menuLinks[0]?.focus()
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setMenuOpen(false)
+        menuButton?.focus()
+        return
+      }
+
+      if (event.key !== 'Tab' || focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const activeElement = document.activeElement
+
+      if (event.shiftKey && (activeElement === firstElement || !focusableElements.includes(activeElement as HTMLElement))) {
+        event.preventDefault()
+        lastElement.focus()
+      } else if (!event.shiftKey && (activeElement === lastElement || !focusableElements.includes(activeElement as HTMLElement))) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [menuOpen])
+
+  function closeMenu() {
+    setMenuOpen(false)
+    menuButtonRef.current?.focus()
+  }
 
   return (
     <main id="top" className="overflow-hidden">
@@ -118,9 +161,11 @@ export default function Home() {
               <Link className="button button-small bg-yellow text-midnight" to="/join">Join</Link>
             </div>
             <button
+              ref={menuButtonRef}
               className="grid size-11 place-items-center rounded-lg border border-white/15 md:hidden"
               type="button"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-controls="home-mobile-navigation"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
             >
@@ -129,13 +174,13 @@ export default function Home() {
           </nav>
 
           {menuOpen ? (
-            <div className="page-shell border-t border-white/10 py-6 md:hidden">
+            <div ref={mobileMenuRef} id="home-mobile-navigation" className="page-shell border-t border-white/10 py-6 md:hidden">
               <div className="flex flex-col gap-5 text-lg">
-                <a href="https://cafein.id" target="_blank" rel="noreferrer">Cafes</a>
-                <Link to="/chapters" onClick={() => setMenuOpen(false)}>Chapters</Link>
-                <Link to="/events" onClick={() => setMenuOpen(false)}>Events</Link>
-                <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
-                <Link className="text-yellow" to="/join" onClick={() => setMenuOpen(false)}>Join community →</Link>
+                <a href="https://cafein.id" target="_blank" rel="noreferrer" onClick={closeMenu}>Cafes</a>
+                <Link to="/chapters" onClick={closeMenu}>Chapters</Link>
+                <Link to="/events" onClick={closeMenu}>Events</Link>
+                <Link to="/about" onClick={closeMenu}>About</Link>
+                <Link className="text-yellow" to="/join" onClick={closeMenu}>Join community →</Link>
               </div>
             </div>
           ) : null}
