@@ -25,9 +25,9 @@ User-facing setup references retained from coordination:
 - Canonical repository: `https://github.com/vibefromcafe/vibefromcafe`; local branch: `main`.
 - Remote baseline: `origin/main` at `64e735089be54f3ead94490c680daf6f84e75933`.
 - Fully verified application baseline: `db5783a6d9c7c68427aa19bd82ce346e3211a671`.
-- Before this handoff-only commit, local `main` was clean and **13 commits ahead, 0 behind** `origin/main`. None of those commits had been pushed.
-- The commit containing this file is documentation-only and is the new local `HEAD`; its immutable SHA is recorded in the Amp parent-thread completion message because a commit cannot contain its own SHA.
-- No GitHub issue/PR, Cloudflare resource, deployment, KV record, Access policy, DNS record, domain, or production setting was changed during this work.
+- The original handoff commit is `67b935c2749f50ad6c1c249fe2f97f5812fa7760`; its parent is the exact application baseline above.
+- The 13 application commits plus that handoff commit were pushed to canonical `main` on 2026-09-19. This follow-up documentation commit records the persisted state and is linked from canonical issue #1.
+- External persistence is limited to the owner-authorized canonical `main` push and the pause/resume update on canonical issue #1. No PR, Cloudflare resource, deployment, KV record, Access policy, DNS record, domain, or production setting was changed.
 
 Do not rebuild “the same” application from the handoff commit when staging was explicitly approved for `db5783a`. Create a detached worktree at the exact baseline:
 
@@ -102,7 +102,7 @@ GitHub state below was read-only verified on 2026-08-30. No closure/update was p
 | [#13](https://github.com/vibefromcafe/vibefromcafe/issues/13) | Repository workflow is local in `321a59e`; keep open for deployed Access-backed synthetic validation and owner-approved operations. |
 | [#14](https://github.com/vibefromcafe/vibefromcafe/issues/14) | Navigation and event-state portions are local; keep open for remaining form announcements/keyboard coverage, card-affordance audit, language marking, and broader accessibility audit. |
 | [#24](https://github.com/vibefromcafe/vibefromcafe/issues/24) | Operator-only: require canonical CI through a `main` ruleset and prove blocked/green behavior. |
-| [#25](https://github.com/vibefromcafe/vibefromcafe/issues/25) | Owner/security gate: inspect two high and one low alert, remediate or record time-bounded risk acceptance. |
+| [#25](https://github.com/vibefromcafe/vibefromcafe/issues/25) | Owner/security gate. Its older issue evidence reported two high and one low alert, but the 2026-09-19 push reported 22 default-branch vulnerabilities (10 high, 11 moderate, 1 low). Refresh the private alert inventory, then remediate or record time-bounded risk acceptance; do not assume either count is current without GitHub security access. |
 | [#26](https://github.com/vibefromcafe/vibefromcafe/issues/26) | Read-only findings are local in `67489c4`; remediation/isolation evidence remains open and blocks staging-dependent closure. |
 | [#27](https://github.com/vibefromcafe/vibefromcafe/issues/27) | Pages-side contract is local; external DO code/resource and 100-request boundary/multi-PoP evidence are absent. |
 | [#28](https://github.com/vibefromcafe/vibefromcafe/issues/28) | Repository privacy-safe dedupe/deletion is local; keep open for secret rotation, live key inspection, reconciliation, and residual-race acceptance or redesign. |
@@ -237,11 +237,11 @@ Authoritative validation details: [Admin security smoke tests](admin-security.md
 7. Name claims owner/review cadence; supply four chapter-specific destinations if desired; approve event archive policy and real event action/content URLs.
 8. Define privacy identity verification, response target, retention scheduler, export/correction/backup procedure, primary/backup/escalation ownership, and non-author drill.
 9. Resolve dependency alerts (#25), canonical branch rules (#24), and legacy sync #17/#39.
-10. After complete staging evidence, decide whether to push the 14-commit local series and how to replace/close stale PRs. Pushing, PR mutation, merging, deployment, production cutover, and archival each require explicit approval.
+10. The combined series is now on canonical `main`. Decide how to update/close stale PRs with replacement links after review. PR mutation, merging other branches, deployment, production cutover, and archival each require explicit approval.
 
 ## Precise resume checklist
 
-1. Open this file and verify local `HEAD` is the handoff commit reported by the parent Amp thread; verify `db5783a6d9c7c68427aa19bd82ce346e3211a671` is its first parent and `git status --short` is empty.
+1. Start from canonical `main`, open this file, and verify `67b935c2749f50ad6c1c249fe2f97f5812fa7760` and `db5783a6d9c7c68427aa19bd82ce346e3211a671` are ancestors of `HEAD`; verify `git status --short` is empty.
 2. Confirm the user still authorizes the bounded **non-production** package. Authorization expires semantically if account/resource topology or requested scope changes, even though the token itself is long-running.
 3. Confirm all required Amp names exist without printing values. Repeat GET-only permission preflight. If any required endpoint is `403`, stop and report; do not partially provision.
 4. Resolve the absent external DO implementation before deploying it. Run its unit/concurrency tests and review its migration/binding config.
